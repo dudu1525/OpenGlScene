@@ -53,12 +53,6 @@ glm::mat4 view;
 glm::mat4 projection;
 glm::mat3 normalMatrix;
 
-
-
-
-
-
-
 // shader uniform locations
 GLint modelLoc;
 GLint viewLoc;
@@ -72,7 +66,6 @@ GLint normalMatrixLoc;
 
 // models
 gps::Model3D teapot;
-gps::Model3D sun;
 GLfloat angle;
 
 
@@ -121,6 +114,11 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
+    if (key == GLFW_KEY_F && action == GLFW_PRESS) { 
+        scene.changeNightDayDirLight(myBasicShader.shaderProgram);
+    }
+
+
 
 	if (key >= 0 && key < 1024) {
         if (action == GLFW_PRESS) {
@@ -163,8 +161,9 @@ void initOpenGLState() {
 }
 //////////////////////////////////////////////////////////////////////////////////////init shaders, uniforms, models
 void initModels() {
+    scene.initLightsModels();
     teapot.LoadModel("models/teapot/teapot20segUT.obj");
-    sun.LoadModel("models/lights/sphere2.obj");
+
 }
 
 void initShaders() {
@@ -173,13 +172,12 @@ void initShaders() {
         "shaders/basic.frag");
 }
 void initScene()
-{   //initialize directional light - bright/day
+{   //initialize directional light - bright
     glm::vec3 direction(0.0f, -1.0f, -1.0f);
     glm::vec3 ambientD(0.1f, 0.1f, 0.15f);
     glm::vec3 diffuseD(1.0f, 0.95f, 0.8f);
     glm::vec3 specularD(1.0f, 1.0f, 1.0f);
     scene.initializeLights(direction, ambientD, diffuseD, specularD);
-
 
 
 }
@@ -250,6 +248,8 @@ void processMovement() {
         model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0, 1, 0));
       //  normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
     }
+
+   
 }
 
 
@@ -262,22 +262,12 @@ void renderTeapot(gps::Shader shader) {
 
     shader.useShaderProgram();
 
-
+    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
     teapot.Draw(shader);
 
 
-
-    glm::mat4 sunModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, -2.0f));
-    sunModelMatrix = glm::scale(sunModelMatrix, glm::vec3(1.015f));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(sunModelMatrix));
-
-   
-    glm::mat3 sunNormalMatrix = glm::mat3(glm::inverseTranspose(view * sunModelMatrix));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(sunNormalMatrix));
-
-    sun.Draw(shader);
 
 }
 
@@ -286,24 +276,19 @@ void renderScene() {
     view = camera.getViewMatrix();
     myBasicShader.useShaderProgram();
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view)); //set the values for the uniform containing the view
-    //objects all generally share this view, projection matrixes
-    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-
-
-
-
     projection = glm::perspective(glm::radians(camera.zoom), (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height, 0.1f, 100.0f);
     projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");//get location of uniform/input
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection)); //set the projection for the uniform containing the view
+    //objects all generally share this view, projection matrixes
+   
 
 
 
 
-
-
+   
 	renderTeapot(myBasicShader);
 
+    scene.renderLights(myBasicShader, view);
 }
 
 void cleanup() {

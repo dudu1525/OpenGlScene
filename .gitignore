@@ -1,0 +1,57 @@
+# ===============================
+# Visual Studio / MSVC
+# ===============================
+
+# User-specific files
+.vs/
+*.user
+*.userosscache
+*.suo
+
+# Build results
+Debug/
+Release/
+x64/
+x86/
+ARM/
+ARM64/
+
+# Intermediate files
+*.obj
+*.pdb
+*.ipdb
+*.iobj
+*.ilk
+*.idb
+*.pch
+*.tlog
+*.log
+
+# Executables & libs
+*.exe
+*.dll
+*.lib
+*.exp
+
+# CMake (if used)
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.cmake
+
+# Visual Studio generated
+*.VC.db
+*.VC.opendb
+
+# ===============================
+# OS / Editor junk
+# ===============================
+.DS_Store
+Thumbs.db
+
+# ===============================
+# Optional: shader cache / assets
+# ===============================
+*.spv
+
+models/

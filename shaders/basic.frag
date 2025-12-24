@@ -1,58 +1,56 @@
 #version 410 core
-
-in vec3 fPosEye;       
-in vec3 fNormalEye;  
-in vec2 fTexCoords;
-
 out vec4 fColor;
 
-//matrices
-//uniform mat4 model;
+struct DirLight {
+    vec3 direction;
+	
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+
+in vec3 fPosEye;
+in vec3 fNormalEye;
+in vec2 fTexCoords;
+
+uniform DirLight dirLight;
 uniform mat4 view;
-//uniform mat3 normalMatrix;
-//lighting
-uniform vec3 lightDir;
-uniform vec3 lightColor;
 // textures
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
 
-//components
-vec3 ambient;
-float ambientStrength = 0.2f;
-vec3 diffuse;
-vec3 specular;
-float specularStrength = 0.5f;
 
-void computeDirLight()
-{
-    
-    vec3 normalEye = normalize(fNormalEye);
-    //normalize light direction
-    vec3 lightDirN = vec3(normalize(view * vec4(lightDir, 0.0f)));
+vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 
-    //compute view direction (in eye coordinates, the viewer is situated at the origin
-    vec3 viewDir = normalize(- fPosEye.xyz);
 
-    //compute ambient light
-    ambient = ambientStrength * lightColor;
-
-    //compute diffuse light
-    diffuse = max(dot(normalEye, lightDirN), 0.0f) * lightColor;
-
-    //compute specular light
-    vec3 reflectDir = reflect(-lightDirN, normalEye);
-    float specCoeff = pow(max(dot(viewDir, reflectDir), 0.0f), 32);
-    specular = specularStrength * specCoeff * lightColor;
-}
 
 void main() 
 {
-    computeDirLight();
 
-    //compute final vertex color
-    vec3 color = min((ambient + diffuse) * texture(diffuseTexture, fTexCoords).rgb + specular * texture(specularTexture, fTexCoords).rgb, 1.0f);
+    vec3 normal = normalize(fNormalEye);
+    vec3 viewDir = normalize(-fPosEye); 
 
-   fColor = vec4(color, 1.0f);
+    vec3 lightResult = CalcDirLight(dirLight, normal, viewDir);
 
+    fColor = vec4(lightResult, 1.0f);
+}
+
+vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
+{
+    vec3 lightDirEye = vec3(normalize(view * vec4(light.direction, 0.0)));
+    vec3 lightDir = normalize(-lightDirEye);
+
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+
+    vec3 texDiffuse = texture(diffuseTexture, fTexCoords).rgb;
+    vec3 texSpecular = texture(specularTexture, fTexCoords).rgb;
+
+    vec3 ambient  = light.ambient  * texDiffuse;
+    vec3 diffuse  = light.diffuse  * diff * texDiffuse;
+    vec3 specular = light.specular * spec * texSpecular;
+
+    return (ambient + diffuse + specular);
 }

@@ -19,7 +19,8 @@
 #include "Model3D.hpp"
 
 #include <iostream>
-
+#include "Scene.hpp"
+#include "LightSources.h"
 //////////////////////////// window
 gps::Window myWindow;
 
@@ -43,6 +44,7 @@ GLboolean pressedKeys[1024];
 gps::Shader myBasicShader;
 
 
+gps::Scene scene;
 
 
 // matrices
@@ -56,17 +58,12 @@ glm::mat3 normalMatrix;
 
 
 
-// light parameters
-glm::vec3 lightDir;
-glm::vec3 lightColor;
 
 // shader uniform locations
 GLint modelLoc;
 GLint viewLoc;
 GLint projectionLoc;
 GLint normalMatrixLoc;
-GLint lightDirLoc;
-GLint lightColorLoc;
 
 
 
@@ -175,12 +172,23 @@ void initShaders() {
         "shaders/basic.vert",
         "shaders/basic.frag");
 }
+void initScene()
+{   //initialize directional light - bright/day
+    glm::vec3 direction(0.0f, -1.0f, -1.0f);
+    glm::vec3 ambientD(0.1f, 0.1f, 0.15f);
+    glm::vec3 diffuseD(1.0f, 0.95f, 0.8f);
+    glm::vec3 specularD(1.0f, 1.0f, 1.0f);
+    scene.initializeLights(direction, ambientD, diffuseD, specularD);
 
+
+
+}
 void initUniforms() {
     myBasicShader.useShaderProgram();
 
     // create model matrix for teapot
     model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
+   // model = glm::translate(glm::vec3(10.0f, 0.0f, 0.0f));
     modelLoc = glGetUniformLocation(myBasicShader.shaderProgram, "model");
 
     // get view matrix for current camera
@@ -201,17 +209,9 @@ void initUniforms() {
     // send projection matrix to shader
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    //set the light direction (direction towards the light)
-    lightDir = glm::vec3(0.0f, 1.0f, 0.0f);
-    lightDirLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightDir");
-    // send light dir to shader
-    glUniform3fv(lightDirLoc, 1, glm::value_ptr(lightDir));
 
-    //set light color
-    lightColor = glm::vec3(1.0f, 1.0f, 1.0f); //white light
-    lightColorLoc = glGetUniformLocation(myBasicShader.shaderProgram, "lightColor");
-    // send light color to shader
-    glUniform3fv(lightColorLoc, 1, glm::value_ptr(lightColor));
+
+    scene.lightSources.setLightUniforms(myBasicShader.shaderProgram);
 }
 
 
@@ -259,21 +259,17 @@ void processMovement() {
 
 
 void renderTeapot(gps::Shader shader) {
-    // select active shader program
+
     shader.useShaderProgram();
 
-    //send teapot model matrix data to shader
+
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-    //send teapot normal matrix data to shader
     glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-
-    // draw teapot
     teapot.Draw(shader);
 
 
 
-    glm::mat4 sunModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, -1.0f));
+    glm::mat4 sunModelMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, -2.0f));
     sunModelMatrix = glm::scale(sunModelMatrix, glm::vec3(1.015f));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(sunModelMatrix));
 
@@ -329,9 +325,10 @@ int main(int argc, const char * argv[]) {
     initOpenGLState();
 	initModels();
 	initShaders();
+    initScene();
 	initUniforms();
     setWindowCallbacks();
-
+  
 	glCheckError();
 
 

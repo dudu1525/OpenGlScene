@@ -42,6 +42,7 @@ GLboolean pressedKeys[1024];
 
 /////////////////////////// shaders
 gps::Shader myBasicShader;
+gps::Shader skyboxShader;
 
 
 gps::Scene scene;
@@ -115,7 +116,7 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
     if (key == GLFW_KEY_F && action == GLFW_PRESS) { 
-        scene.changeNightDayDirLight(myBasicShader.shaderProgram);
+        scene.changeNightDayDirLight(myBasicShader);
     }
 
 
@@ -170,14 +171,18 @@ void initShaders() {
     myBasicShader.loadShader(
         "shaders/basic.vert",
         "shaders/basic.frag");
+    skyboxShader.loadShader(
+        "shaders/skybox.vert",
+        "shaders/skybox.frag");
 }
 void initScene()
 {   //initialize directional light - bright
-    glm::vec3 direction(0.0f, -1.0f, -1.0f);
+    glm::vec3 direction(-11.0f, -5.0f, -1.0f);
     glm::vec3 ambientD(0.1f, 0.1f, 0.15f);
     glm::vec3 diffuseD(1.0f, 0.95f, 0.8f);
     glm::vec3 specularD(1.0f, 1.0f, 1.0f);
     scene.initializeLights(direction, ambientD, diffuseD, specularD);
+    scene.initializeSkybox(skyboxShader);
 
 
 }
@@ -289,11 +294,16 @@ void renderScene() {
 	renderTeapot(myBasicShader);
 
     scene.renderLights(myBasicShader, view);
+
+    scene.drawSkybox(skyboxShader, camera, projection);
+    //skybox rendered last
+
+
 }
 
 void cleanup() {
     myWindow.Delete();
-
+    //delete skybox, moon/sun!!
 
 
 }

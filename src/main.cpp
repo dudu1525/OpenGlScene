@@ -26,10 +26,10 @@ gps::Window myWindow;
 
 ///////////////////////////// camera
 gps::Camera camera(
-    glm::vec3(0.0f, 0.0f, 3.0f),
+    glm::vec3(0.0f, 200.0f, 400.0f),
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f),
-    2.1f);
+    1112.1f);
 bool firstMouse = true; 
 float lastX = myWindow.getWindowDimensions().width / 2; 
 float lastY = myWindow.getWindowDimensions().height / 2;
@@ -43,7 +43,7 @@ GLboolean pressedKeys[1024];
 /////////////////////////// shaders
 gps::Shader myBasicShader;
 gps::Shader skyboxShader;
-
+gps::Shader terrainShader;
 
 gps::Scene scene;
 
@@ -119,6 +119,12 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
         scene.changeNightDayDirLight(myBasicShader);
     }
 
+    if (key == GLFW_KEY_H && action == GLFW_PRESS) {
+        glPolygonMode(GL_FRONT, GL_LINE);
+        glPolygonMode(GL_BACK, GL_LINE);
+    }
+
+
 
 
 	if (key >= 0 && key < 1024) {
@@ -164,6 +170,7 @@ void initOpenGLState() {
 void initModels() {
     scene.initLightsModels();
     teapot.LoadModel("models/teapot/teapot20segUT.obj");
+ 
 
 }
 
@@ -171,9 +178,11 @@ void initShaders() {
     myBasicShader.loadShader(
         "shaders/basic.vert",
         "shaders/basic.frag");
-    skyboxShader.loadShader(
-        "shaders/skybox.vert",
-        "shaders/skybox.frag");
+    skyboxShader.loadShader( "shaders/skybox.vert","shaders/skybox.frag");
+
+    terrainShader.loadMultipleShaders("shaders/tess/vert.in", "shaders/tess/frag.in", nullptr, "shaders/tess/tcs.in", "shaders/tess/tes.in");
+
+
 }
 void initScene()
 {   //initialize directional light - bright
@@ -183,7 +192,7 @@ void initScene()
     glm::vec3 specularD(1.0f, 1.0f, 1.0f);
     scene.initializeLights(direction, ambientD, diffuseD, specularD);
     scene.initializeSkybox(skyboxShader);
-
+    scene.initTerrain("models/terrain/iceland_heightmap.png", terrainShader);
 
 }
 void initUniforms() {
@@ -207,7 +216,7 @@ void initUniforms() {
     // create projection matrix
     projection = glm::perspective(glm::radians(45.0f),
         (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
-        0.1f, 100.0f);
+        0.1f, 100000.0f);
     projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");
     // send projection matrix to shader
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -255,6 +264,8 @@ void processMovement() {
     }
 
    
+
+   
 }
 
 
@@ -282,7 +293,7 @@ void renderScene() {
     view = camera.getViewMatrix();
     myBasicShader.useShaderProgram();
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view)); //set the values for the uniform containing the view
-    projection = glm::perspective(glm::radians(camera.zoom), (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(camera.zoom), (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height, 0.1f, 5550.0f);
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection)); //set the projection for the uniform containing the view
     glUniform3fv(glGetUniformLocation(myBasicShader.shaderProgram, "viewPos"), 1, glm::value_ptr(camera.getPositionCamera()));
 
@@ -292,6 +303,7 @@ void renderScene() {
    
 	renderTeapot(myBasicShader);
 
+    scene.renderTerrain(terrainShader, projection, view);
     scene.renderLights(myBasicShader);
 
     scene.drawSkybox(skyboxShader, camera, projection);

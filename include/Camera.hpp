@@ -34,7 +34,7 @@ namespace gps {
         float yaw = -90.0f;
         float pitch = 0.0f;
         
-        float speed = 0.05f;
+        float speed = 0.15f;
 
         const float sensitivity = 0.1f;
 

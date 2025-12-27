@@ -30,6 +30,7 @@
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Skybox.cpp" />
     <ClCompile Include="src\stb_image.cpp" />
+    <ClCompile Include="src\Terrain.cpp" />
     <ClCompile Include="src\tiny_obj_loader.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
@@ -44,6 +45,7 @@
     <ClInclude Include="include\Shader.hpp" />
     <ClInclude Include="include\Skybox.h" />
     <ClInclude Include="include\stb_image.h" />
+    <ClInclude Include="include\Terrain.h" />
     <ClInclude Include="include\tiny_obj_loader.h" />
     <ClInclude Include="include\Window.h" />
   </ItemGroup>

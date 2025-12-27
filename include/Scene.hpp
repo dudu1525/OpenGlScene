@@ -5,6 +5,8 @@
 #include "Shader.hpp"
 #include "Entity.h"
 #include "Skybox.h"
+#include "Shader.hpp"
+#include "Terrain.h"
 using glm::vec3;
 
 namespace gps {
@@ -15,13 +17,21 @@ namespace gps {
 	public:
 		Scene();
 		LightSources lightSources;
-		void initializeLights(vec3 direction, vec3 ambientD, vec3 diffuseD, vec3 specularD);
+
 		void changeNightDayDirLight(Shader shader);
-		
-		void drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection);
-		void initLightsModels();
-		void initializeSkybox(Shader shader);
+
+
+
 		void renderLights(Shader lightsshader);
+		void drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection);
+		void renderTerrain(Shader terrainShader, glm::mat4 projection, glm::mat4 view);
+
+
+		void initializeLights(vec3 direction, vec3 ambientD, vec3 diffuseD, vec3 specularD);
+		void initLightsModels();
+		void initTerrain(const char* heightmap, gps::Shader shader);
+		void initializeSkybox(Shader shader);
+		
 	private:
 		bool dayTime=true;
 		gps::Model3D sunModel;
@@ -29,6 +39,7 @@ namespace gps {
 		Entity sun;
 		Entity moon;
 		Skybox skybox;
+		Terrain terrain;
 
 	};
 

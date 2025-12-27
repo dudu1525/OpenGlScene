@@ -45,6 +45,11 @@ void gps::Scene::drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 pr
 
 }
 
+void gps::Scene::renderTerrain(Shader terrainShader, glm::mat4 projection, glm::mat4 view)
+{
+	terrain.renderTerrain(terrainShader, projection, view);
+}
+
 void gps::Scene::initLightsModels()
 {
 	sunModel.LoadModel("models/lights/sphere2.obj");
@@ -53,6 +58,14 @@ void gps::Scene::initLightsModels()
 	this->moon = Entity(&moonModel, glm::vec3(0.0f, 2.0f, -2.0f));
 
 
+}
+
+void gps::Scene::initTerrain(const char* heightmap,gps::Shader shader )
+{
+//	terrain.loadFromFile("models/terrain/heightmap.save");
+	terrain.initializeTerrain(heightmap, shader);
+
+	
 }
 
 void gps::Scene::initializeSkybox(gps::Shader shader)

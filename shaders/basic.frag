@@ -10,12 +10,12 @@ struct DirLight {
 };
 
 
-in vec3 fPosEye;
-in vec3 fNormalEye;
+in vec3 fPosWorld;
+in vec3 fNormalWorld;
 in vec2 fTexCoords;
 
 uniform DirLight dirLight;
-uniform mat4 view;
+uniform vec3 viewPos;
 // textures
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
@@ -28,8 +28,8 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 void main() 
 {
 
-    vec3 normal = normalize(fNormalEye);
-    vec3 viewDir = normalize(-fPosEye); 
+    vec3 normal = normalize(fNormalWorld);
+     vec3 viewDir = normalize(viewPos - fPosWorld); 
 
     vec3 lightResult = CalcDirLight(dirLight, normal, viewDir);
 
@@ -38,8 +38,8 @@ void main()
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
-    vec3 lightDirEye = vec3(normalize(view * vec4(light.direction, 0.0)));
-    vec3 lightDir = normalize(-lightDirEye);
+   
+    vec3 lightDir = normalize(-light.direction);
 
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 reflectDir = reflect(-lightDir, normal);

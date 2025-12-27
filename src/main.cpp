@@ -201,7 +201,7 @@ void initUniforms() {
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
     // compute normal matrix for teapot
-    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+    normalMatrix = glm::mat3(glm::inverseTranspose(model));
     normalMatrixLoc = glGetUniformLocation(myBasicShader.shaderProgram, "normalMatrix");
 
     // create projection matrix
@@ -267,7 +267,7 @@ void renderTeapot(gps::Shader shader) {
 
     shader.useShaderProgram();
 
-    normalMatrix = glm::mat3(glm::inverseTranspose(view * model));
+    normalMatrix = glm::mat3(glm::inverseTranspose(model));
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
     teapot.Draw(shader);
@@ -278,14 +278,13 @@ void renderTeapot(gps::Shader shader) {
 
 void renderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //objects all generally share this view, projection matrixes
     view = camera.getViewMatrix();
     myBasicShader.useShaderProgram();
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view)); //set the values for the uniform containing the view
     projection = glm::perspective(glm::radians(camera.zoom), (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height, 0.1f, 100.0f);
-    projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");//get location of uniform/input
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection)); //set the projection for the uniform containing the view
-    //objects all generally share this view, projection matrixes
-   
+    glUniform3fv(glGetUniformLocation(myBasicShader.shaderProgram, "viewPos"), 1, glm::value_ptr(camera.getPositionCamera()));
 
 
 
@@ -293,7 +292,7 @@ void renderScene() {
    
 	renderTeapot(myBasicShader);
 
-    scene.renderLights(myBasicShader, view);
+    scene.renderLights(myBasicShader);
 
     scene.drawSkybox(skyboxShader, camera, projection);
     //skybox rendered last

@@ -4,23 +4,24 @@ layout(location=0) in vec3 vPosition;
 layout(location=1) in vec3 vNormal;
 layout(location=2) in vec2 vTexCoords;
 
-out vec3 fPosEye;    
-out vec3 fNormalEye;
+out vec3 fPosWorld;    
+out vec3 fNormalWorld;
 
 out vec2 fTexCoords;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform mat3 normalMatrix;
+uniform mat3 normalMatrix; //transpose (inverse matrix)
 
 void main()
 {
     gl_Position = projection * view * model * vec4(vPosition, 1.0);
     fTexCoords = vTexCoords;
 
-    fPosEye = vec3(view * model * vec4(vPosition, 1.0));
+    //world space
+    fPosWorld = vec3( model * vec4(vPosition, 1.0));
 
-    fNormalEye = normalize(normalMatrix * vNormal);
+    fNormalWorld = normalize(normalMatrix * vNormal);
 
 }

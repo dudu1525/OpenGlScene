@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "LightSources.h"
 #include "Shader.hpp"
-#include "Model3D.hpp"
+#include "Entity.h"
 #include "Skybox.h"
 using glm::vec3;
 
@@ -21,11 +21,13 @@ namespace gps {
 		void drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection);
 		void initLightsModels();
 		void initializeSkybox(Shader shader);
-		void renderLights(Shader lightsshader, glm::mat4 view);
+		void renderLights(Shader lightsshader);
 	private:
 		bool dayTime=true;
-		gps::Model3D sun;
-		gps::Model3D moon;
+		gps::Model3D sunModel;
+		gps::Model3D moonModel;
+		Entity sun;
+		Entity moon;
 		Skybox skybox;
 
 	};

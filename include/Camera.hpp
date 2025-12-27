@@ -23,6 +23,8 @@ namespace gps {
         void rotate(float xoffset, float yoffset);
 
         void ProcessMouseScroll(float yoffset);
+
+        glm::vec3 getPositionCamera() { return this->cameraPosition; }
     private:
         glm::vec3 cameraPosition;
         glm::vec3 cameraTarget;

@@ -3,7 +3,6 @@
 gps::Scene::Scene()
 {
 	
-	//moon.LoadModel("models/lights/sphere.obj");
 
 }
 
@@ -48,8 +47,12 @@ void gps::Scene::drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 pr
 
 void gps::Scene::initLightsModels()
 {
-	sun.LoadModel("models/lights/sphere2.obj");
-	moon.LoadModel("models/lights/sphere.obj");
+	sunModel.LoadModel("models/lights/sphere2.obj");
+	moonModel.LoadModel("models/lights/sphere.obj");
+	this->sun = Entity(&sunModel, glm::vec3(72.0f, 11.0f, -2.0f));
+	this->moon = Entity(&moonModel, glm::vec3(0.0f, 2.0f, -2.0f));
+
+
 }
 
 void gps::Scene::initializeSkybox(gps::Shader shader)
@@ -58,28 +61,27 @@ void gps::Scene::initializeSkybox(gps::Shader shader)
 
 }
 
-void gps::Scene::renderLights(Shader lightsshader, glm::mat4 view)
+void gps::Scene::renderLights(Shader lightsshader)
 {
 	lightsshader.useShaderProgram();
 
 	if (dayTime)//render sun
 	{
-		glm::mat4 sunModel = glm::translate(glm::mat4(1.0f), glm::vec3(72.0f, 11.0f, -2.0f));
-		glUniformMatrix4fv(glGetUniformLocation(lightsshader.shaderProgram, "model"), 1,GL_FALSE, glm::value_ptr(sunModel)  );
-		glm::mat3 sunNormal = glm::mat3(glm::inverseTranspose(view * sunModel));
+	
+		glUniformMatrix4fv(glGetUniformLocation(lightsshader.shaderProgram, "model"), 1,GL_FALSE, glm::value_ptr(sun.getModelMatrix())  );
+		glm::mat3 sunNormal = glm::mat3(glm::inverseTranspose(sun.getModelMatrix()));
 		glUniformMatrix3fv(glGetUniformLocation(lightsshader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(sunNormal));
 		
-		sun.Draw(lightsshader);
+		sun.getModel()->Draw(lightsshader);
 
 	}
 	else//render moon
 	{
-		glm::mat4 moonModel = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, -2.0f));
-		glUniformMatrix4fv(glGetUniformLocation(lightsshader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(moonModel));
-		glm::mat3 moonNormal = glm::mat3(glm::inverseTranspose(view * moonModel));
+		glUniformMatrix4fv(glGetUniformLocation(lightsshader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(moon.getModelMatrix()));
+		glm::mat3 moonNormal = glm::mat3(glm::inverseTranspose(moon.getModelMatrix()));
 		glUniformMatrix3fv(glGetUniformLocation(lightsshader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(moonNormal));
 
-		moon.Draw(lightsshader);
+		moon.getModel()->Draw(lightsshader);
 
 
 	}

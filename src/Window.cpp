@@ -12,10 +12,10 @@ namespace gps {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
+        glfwWindowHint(GLFW_DEPTH_BITS, 32);
         //window scaling for HiDPI displays
         glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
-
+        glEnable(GL_DEPTH_CLAMP);
         //for sRBG framebuffer
         glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 

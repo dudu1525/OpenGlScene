@@ -7,7 +7,10 @@ uniform sampler2D sandTexture;
 
 void main() {
 
-        vec3 color = texture(sandTexture, TexCoordFrag*100).rgb;
+        //vec3 color = texture(sandTexture, TexCoordFrag*100).rgb;
+        vec3 col1 = texture(sandTexture, TexCoordFrag * 20.0).rgb; 
+        vec3 col2 = texture(sandTexture, TexCoordFrag * 3).rgb;
+        vec3 finalCol = mix(col1, col2, 0.5);
 
-        FragColor = vec4(color, 1.0);
+        FragColor = vec4(finalCol, 1.0);
 }

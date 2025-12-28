@@ -29,7 +29,7 @@ gps::Camera camera(
     glm::vec3(0.0f, 200.0f, 400.0f),
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f),
-    111.0f);
+    1111.0f);
 bool firstMouse = true; 
 float lastX = myWindow.getWindowDimensions().width / 2; 
 float lastY = myWindow.getWindowDimensions().height / 2;
@@ -37,6 +37,7 @@ float lastY = myWindow.getWindowDimensions().height / 2;
 /// ///////////////////////////////////
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
+int wireframeon = 0;
 /// ////////////////////////////
 GLboolean pressedKeys[1024];
 
@@ -114,8 +115,18 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
     }
 
     if (key == GLFW_KEY_H && action == GLFW_PRESS) {
-        glPolygonMode(GL_FRONT, GL_LINE);
-        glPolygonMode(GL_BACK, GL_LINE);
+        if (wireframeon==false)
+        {
+            wireframeon = true;
+            glPolygonMode(GL_FRONT, GL_LINE);
+            glPolygonMode(GL_BACK, GL_LINE);
+        }
+        else
+        {
+            wireframeon = false;
+            glPolygonMode(GL_FRONT, GL_FILL);
+            glPolygonMode(GL_BACK, GL_FILL);
+        }
     }
 
 
@@ -201,7 +212,7 @@ void initUniforms() {
     viewLoc = glGetUniformLocation(myBasicShader.shaderProgram, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-    projection = glm::perspective(glm::radians(45.0f),(float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,0.1f, 100000.0f);
+    projection = glm::perspective(glm::radians(45.0f),(float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,10.0f, 150000.0f);
     projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -262,7 +273,7 @@ void renderScene() {
     view = camera.getViewMatrix();
     myBasicShader.useShaderProgram();
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view)); //set the values for the uniform containing the view
-    projection = glm::perspective(glm::radians(camera.zoom), (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height, 0.1f, 10000.0f);
+    projection = glm::perspective(glm::radians(camera.zoom), (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height, 10.0f, 100000.0f);
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection)); //set the projection for the uniform containing the view
     glUniform3fv(glGetUniformLocation(myBasicShader.shaderProgram, "viewPos"), 1, glm::value_ptr(camera.getPositionCamera()));
 

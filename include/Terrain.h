@@ -32,19 +32,24 @@ public:
 	void renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps::Camera camera);
 
 private:
-	unsigned int heightmapTexture;
-	unsigned char* heightmapData = nullptr;
+	
+	float perlinNoise(float x, float z);
 
 
 	//new
 	unsigned int terrainVAO, terrainVBO, terrainEBO;
 
 
-	int height=2048, width = 2048;//2048 - units of the map
-	int heightUP = 64;
-	const unsigned int rez = 64; //64x64 triangles that are further tessellated to max 1024 per vertex
+	int height=48048, width = 48048;//2048 - units of the map
+	int maxh = 7450;
+
+	const unsigned int rez = 128; //64x64 triangles that are further tessellated to max 1024 per vertex
 	std::vector<float> vertices;
 	std::vector<unsigned int> indices;
+	//std::vector<float> heights;
+
+
+
 
 	unsigned int sandTexture;
 

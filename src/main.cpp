@@ -29,7 +29,7 @@ gps::Camera camera(
     glm::vec3(0.0f, 200.0f, 400.0f),
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f),
-    1112.1f);
+    111.0f);
 bool firstMouse = true; 
 float lastX = myWindow.getWindowDimensions().width / 2; 
 float lastY = myWindow.getWindowDimensions().height / 2;
@@ -52,21 +52,15 @@ gps::Scene scene;
 glm::mat4 model;
 glm::mat4 view;
 glm::mat4 projection;
-glm::mat3 normalMatrix;
 
 // shader uniform locations
 GLint modelLoc;
 GLint viewLoc;
 GLint projectionLoc;
-GLint normalMatrixLoc;
 
 
 
 
-
-
-// models
-gps::Model3D teapot;
 GLfloat angle;
 
 
@@ -168,8 +162,9 @@ void initOpenGLState() {
 }
 //////////////////////////////////////////////////////////////////////////////////////init shaders, uniforms, models
 void initModels() {
+
     scene.initLightsModels();
-    teapot.LoadModel("models/teapot/teapot20segUT.obj");
+
  
 
 }
@@ -190,35 +185,24 @@ void initScene()
     glm::vec3 ambientD(0.1f, 0.1f, 0.15f);
     glm::vec3 diffuseD(1.0f, 0.95f, 0.8f);
     glm::vec3 specularD(1.0f, 1.0f, 1.0f);
+
     scene.initializeLights(direction, ambientD, diffuseD, specularD);
+
     scene.initializeSkybox(skyboxShader);
-    scene.initTerrain("models/terrain/iceland_heightmap.png", terrainShader);
+
+    scene.initTerrain("models/terrain/dessert.png", terrainShader);
 
 }
 void initUniforms() {
     myBasicShader.useShaderProgram();
 
-    // create model matrix for teapot
-    model = glm::rotate(glm::mat4(1.0f), glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-   // model = glm::translate(glm::vec3(10.0f, 0.0f, 0.0f));
-    modelLoc = glGetUniformLocation(myBasicShader.shaderProgram, "model");
 
-    // get view matrix for current camera
     view = camera.getViewMatrix();
     viewLoc = glGetUniformLocation(myBasicShader.shaderProgram, "view");
-    // send view matrix to shader
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-    // compute normal matrix for teapot
-    normalMatrix = glm::mat3(glm::inverseTranspose(model));
-    normalMatrixLoc = glGetUniformLocation(myBasicShader.shaderProgram, "normalMatrix");
-
-    // create projection matrix
-    projection = glm::perspective(glm::radians(45.0f),
-        (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,
-        0.1f, 100000.0f);
+    projection = glm::perspective(glm::radians(45.0f),(float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,0.1f, 100000.0f);
     projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");
-    // send projection matrix to shader
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 
@@ -272,40 +256,21 @@ void processMovement() {
 
 
 
-
-
-void renderTeapot(gps::Shader shader) {
-
-    shader.useShaderProgram();
-
-    normalMatrix = glm::mat3(glm::inverseTranspose(model));
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix3fv(normalMatrixLoc, 1, GL_FALSE, glm::value_ptr(normalMatrix));
-    teapot.Draw(shader);
-
-
-
-}
-
 void renderScene() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //objects all generally share this view, projection matrixes
     view = camera.getViewMatrix();
     myBasicShader.useShaderProgram();
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view)); //set the values for the uniform containing the view
-    projection = glm::perspective(glm::radians(camera.zoom), (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height, 0.1f, 5550.0f);
+    projection = glm::perspective(glm::radians(camera.zoom), (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height, 0.1f, 10000.0f);
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection)); //set the projection for the uniform containing the view
     glUniform3fv(glGetUniformLocation(myBasicShader.shaderProgram, "viewPos"), 1, glm::value_ptr(camera.getPositionCamera()));
 
 
 
 
-   
-	renderTeapot(myBasicShader);
-
-    scene.renderTerrain(terrainShader, projection, view);
+   scene.renderTerrain(terrainShader, projection, camera);
     scene.renderLights(myBasicShader);
-
     scene.drawSkybox(skyboxShader, camera, projection);
     //skybox rendered last
 

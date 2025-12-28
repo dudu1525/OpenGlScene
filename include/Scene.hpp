@@ -1,11 +1,12 @@
 #ifndef Scene_hpp
 #define Scene_hpp
 #include <stdbool.h>
+
 #include "LightSources.h"
 #include "Shader.hpp"
 #include "Entity.h"
 #include "Skybox.h"
-#include "Shader.hpp"
+#include "Camera.hpp"
 #include "Terrain.h"
 using glm::vec3;
 
@@ -24,12 +25,12 @@ namespace gps {
 
 		void renderLights(Shader lightsshader);
 		void drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection);
-		void renderTerrain(Shader terrainShader, glm::mat4 projection, glm::mat4 view);
+		void renderTerrain(Shader terrainShader, glm::mat4 projection, gps::Camera camera);
 
 
 		void initializeLights(vec3 direction, vec3 ambientD, vec3 diffuseD, vec3 specularD);
 		void initLightsModels();
-		void initTerrain(const char* heightmap, gps::Shader shader);
+		void initTerrain(const char* texturePath, gps::Shader shader);
 		void initializeSkybox(Shader shader);
 		
 	private:

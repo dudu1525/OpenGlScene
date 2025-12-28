@@ -14,7 +14,7 @@ void Skybox::initializeSkybox(gps:: Shader shader)
 
     cubemapTexture = loadCubemap();
     shader.useShaderProgram();
-    glUniform1i(glGetUniformLocation(shader.shaderProgram, "skybox"), 0);
+    glUniform1i(glGetUniformLocation(shader.shaderProgram, "skybox"), 10);
 
 
 
@@ -34,7 +34,7 @@ void Skybox::drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projec
 
     // skybox cube
     glBindVertexArray(skyboxVAO);
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE10);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
@@ -44,10 +44,12 @@ void Skybox::drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projec
 
 void Skybox::changeFaces(bool isDay)
 {
+
+
     if (isDay)//if is day, switch to night
     {
         vector<std::string> faces2 = {
-             "models/skybox/nightskybox_right.png",
+        "models/skybox/nightskybox_right.png",
         "models/skybox/nightskybox_left.png",
         "models/skybox/nightskybox_top.png",
         "models/skybox/nightskybox_bottom.png",
@@ -72,10 +74,12 @@ void Skybox::changeFaces(bool isDay)
     }
 
     cubemapTexture = loadCubemap();
+
 }
 
 unsigned int Skybox::loadCubemap()
 {
+    stbi_set_flip_vertically_on_load(false);
     unsigned int textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
@@ -86,6 +90,7 @@ unsigned int Skybox::loadCubemap()
         unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
         if (data)
         {
+
             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
             stbi_image_free(data);
         }

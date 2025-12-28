@@ -3,111 +3,98 @@
 
 #include <cmath>
 
-void Terrain::initializeTerrain(const char* heightmapLocation, gps::Shader terrainShader)
+void Terrain::initializeTerrain(const char* texturePath, gps::Shader terrainShader, gps::LightSources lights)
 {
+    //load texture
+    int textureWidth, textureHeight, nrChannels;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data = stbi_load(texturePath, &textureWidth, &textureHeight, &nrChannels, 0);
 
-	//initialize heightmap
-
-    glGenTextures(1, &heightmapTexture);
-    glActiveTexture(GL_TEXTURE10);
-    glBindTexture(GL_TEXTURE_2D, heightmapTexture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glGenTextures(1, &this->sandTexture);
+    glBindTexture(GL_TEXTURE_2D, this->sandTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-
-    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
-    heightmapData = stbi_load(heightmapLocation, &width, &height, &nrChannels, 0);
-    if (heightmapData)  
-    {   
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, heightmapData);
+    if (data) {
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_SRGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth, textureHeight, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
-        terrainShader.useShaderProgram();
-        glUniform1i(glGetUniformLocation(terrainShader.shaderProgram, "heightMap"), 10);
-        std::cout << "Loaded heightmap of size " << height << " x " << width << std::endl;
+        stbi_image_free(data);
     }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(heightmapData);
 
-	//initialize vertices
 
-   
-    for (unsigned i = 0; i <= rez - 1; i++)
-    {
-        for (unsigned j = 0; j <= rez - 1; j++)
-        {
-            vertices.push_back(-width / 2.0f + width * i / (float)rez); // v.x
-            vertices.push_back(0.0f); // v.y
-            vertices.push_back(-height / 2.0f + height * j / (float)rez); // v.z
-            vertices.push_back(i / (float)rez); // u
-            vertices.push_back(j / (float)rez); // v
 
-            vertices.push_back(-width / 2.0f + width * (i + 1) / (float)rez); // v.x
-            vertices.push_back(0.0f); // v.y
-            vertices.push_back(-height / 2.0f + height * j / (float)rez); // v.z
-            vertices.push_back((i + 1) / (float)rez); // u
-            vertices.push_back(j / (float)rez); // v
-
-            vertices.push_back(-width / 2.0f + width * i / (float)rez); // v.x
-            vertices.push_back(0.0f); // v.y
-            vertices.push_back(-height / 2.0f + height * (j + 1) / (float)rez); // v.z
-            vertices.push_back(i / (float)rez); // u
-            vertices.push_back((j + 1) / (float)rez); // v
-
-            vertices.push_back(-width / 2.0f + width * (i + 1) / (float)rez); // v.x
-            vertices.push_back(0.0f); // v.y
-            vertices.push_back(-height / 2.0f + height * (j + 1) / (float)rez); // v.z
-            vertices.push_back((i + 1) / (float)rez); // u
-            vertices.push_back((j + 1) / (float)rez); // v
+    //set vertices
+    for (int i = 0; i < rez; i++) {
+        for (int j = 0; j < rez; j++) {
+            vertices.push_back(-width / 2.0f + (float)i * width / (rez - 1)); //x
+          //  if (i < rez / 2)
+                vertices.push_back(0.0f);
+          //  else//y
+             //   vertices.push_back((float)i * heightUP / (rez - 1));
+            vertices.push_back(-height / 2.0f + (float)j * height / (rez - 1)); //z
+            vertices.push_back((float)i / (rez - 1));                    //u
+            vertices.push_back((float)j / (rez - 1));                    //v
         }
     }
-    std::cout << "Loaded " << rez * rez << " patches of 4 control points each" << std::endl;
-    std::cout << "Processing " << rez * rez * 4 << " vertices in vertex shader" << std::endl;
-   
-    //load the opengl vao and vbo
+
+    //ebo
+    for (int i = 0; i < rez - 1; i++) {
+        for (int j = 0; j < rez - 1; j++) {
+            indices.push_back(i * rez + j);
+            indices.push_back((i + 1) * rez + j);
+            indices.push_back(i * rez + (j + 1));
+            indices.push_back((i + 1) * rez + (j + 1));
+        }
+    }
+
     glGenVertexArrays(1, &terrainVAO);
     glBindVertexArray(terrainVAO);
 
     glGenBuffers(1, &terrainVBO);
     glBindBuffer(GL_ARRAY_BUFFER, terrainVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    // position attribute
+
+    glGenBuffers(1, &terrainEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, terrainEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // texCoord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    glPatchParameteri(GL_PATCH_VERTICES, NUM_PATCH_PTS);
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
 
+
+    //send light
+   // lights.setLightUniforms(terrainShader.shaderProgram);
 }
 
-void Terrain::renderTerrain(gps::Shader terrainShader, glm::mat4 projection, glm::mat4 view)
+void Terrain::renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps::Camera camera)
 {
     terrainShader.useShaderProgram();
 
-    glActiveTexture(GL_TEXTURE10);
-    glBindTexture(GL_TEXTURE_2D, heightmapTexture);
+    //bind and activate texture 'sandTexture'
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, this->sandTexture);
+    glUniform1i(glGetUniformLocation(terrainShader.shaderProgram, "sandTexture"), 1);
 
+    //send model, view, projection
     glUniformMatrix4fv(glGetUniformLocation(terrainShader.shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    glUniformMatrix4fv(glGetUniformLocation(terrainShader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
-   
-
-
+    glUniformMatrix4fv(glGetUniformLocation(terrainShader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+    glUniformMatrix4fv(glGetUniformLocation(terrainShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0f)));
     // world transformation
+
+
     glm::mat4 model = glm::mat4(1.0f);
     glUniformMatrix4fv(glGetUniformLocation(terrainShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-    // render the terrain
+    // render the vertices
     glBindVertexArray(terrainVAO);
     glDisable(GL_CULL_FACE);
-    glDrawArrays(GL_PATCHES, 0, NUM_PATCH_PTS * rez * rez);
+    glDrawElements(GL_PATCHES, (rez-1) * (rez-1) * 4, GL_UNSIGNED_INT, 0);
     glEnable(GL_CULL_FACE);
 }

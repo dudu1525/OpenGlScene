@@ -16,6 +16,8 @@
 
 
 #include "Shader.hpp"
+#include "LightSources.h"
+#include "Camera.hpp"
 #include <iostream>
 #include <vector>
 
@@ -26,20 +28,25 @@ class Terrain {
 public:
 	Terrain() {}
 	//new
-	void initializeTerrain(const char* heightmapLocation, gps::Shader terrainShader);
-	void renderTerrain(gps::Shader terrainShader, glm::mat4 projection, glm::mat4 view);
+	void initializeTerrain(const char* texturePath, gps::Shader terrainShader, gps::LightSources lights);
+	void renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps::Camera camera);
 
 private:
-
+	unsigned int heightmapTexture;
+	unsigned char* heightmapData = nullptr;
 
 
 	//new
-	unsigned int terrainVAO, terrainVBO;
-	unsigned int heightmapTexture;
-	unsigned char* heightmapData = nullptr;
-	int height=0, width = 0, nrChannels;
-	const unsigned int rez = 50;
+	unsigned int terrainVAO, terrainVBO, terrainEBO;
+
+
+	int height=2048, width = 2048;//2048 - units of the map
+	int heightUP = 64;
+	const unsigned int rez = 64; //64x64 triangles that are further tessellated to max 1024 per vertex
 	std::vector<float> vertices;
+	std::vector<unsigned int> indices;
+
+	unsigned int sandTexture;
 
 
 };

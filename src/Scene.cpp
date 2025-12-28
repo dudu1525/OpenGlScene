@@ -18,7 +18,7 @@ void gps::Scene::changeNightDayDirLight(Shader shader)
 	if (dayTime)
 	{
 		dayTime = false;
-		glm::vec3 direction(-5.0f, -2.0f, -1.0f);
+		glm::vec3 direction(5.0f, -2.0f, -1.0f);
 		glm::vec3 ambientD(0.02f, 0.02f, 0.08f);
 		glm::vec3 diffuseD(0.15f, 0.15f, 0.25f);
 		glm::vec3 specularD(0.2f, 0.2f, 0.3f);
@@ -45,25 +45,25 @@ void gps::Scene::drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 pr
 
 }
 
-void gps::Scene::renderTerrain(Shader terrainShader, glm::mat4 projection, glm::mat4 view)
+void gps::Scene::renderTerrain(Shader terrainShader, glm::mat4 projection,gps::Camera camera)
 {
-	terrain.renderTerrain(terrainShader, projection, view);
+	terrain.renderTerrain(terrainShader, projection, camera);
 }
 
 void gps::Scene::initLightsModels()
 {
 	sunModel.LoadModel("models/lights/sphere2.obj");
 	moonModel.LoadModel("models/lights/sphere.obj");
-	this->sun = Entity(&sunModel, glm::vec3(72.0f, 11.0f, -2.0f));
-	this->moon = Entity(&moonModel, glm::vec3(0.0f, 2.0f, -2.0f));
-
-
+	this->sun = Entity(&sunModel, glm::vec3(0.0f, 50.0f, 0.0f));
+	this->moon = Entity(&moonModel, glm::vec3(0.0f, 50.0f, 0.0f));
+	this->sun.scale = 50;
+	this->moon.scale = 50;
 }
 
-void gps::Scene::initTerrain(const char* heightmap,gps::Shader shader )
+void gps::Scene::initTerrain(const char* texturePath,gps::Shader shader )
 {
 //	terrain.loadFromFile("models/terrain/heightmap.save");
-	terrain.initializeTerrain(heightmap, shader);
+	terrain.initializeTerrain(texturePath, shader, lightSources);
 
 	
 }

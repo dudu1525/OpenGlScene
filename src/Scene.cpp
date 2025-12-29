@@ -51,14 +51,19 @@ void gps::Scene::renderTerrain(Shader terrainShader, glm::mat4 projection,gps::C
 	terrain.renderTerrain(terrainShader, projection, camera);
 }
 
+void gps::Scene::renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera)
+{
+	this->water.renderWater(waterShader, projection, camera);
+}
+
 void gps::Scene::initLightsModels()
 {
 	sunModel.LoadModel("models/lights/sphere2.obj");
 	moonModel.LoadModel("models/lights/sphere.obj");
-	this->sun = Entity(&sunModel, glm::vec3(0.0f, 50.0f, 0.0f));
-	this->moon = Entity(&moonModel, glm::vec3(0.0f, 50.0f, 0.0f));
-	this->sun.scale = 50;
-	this->moon.scale = 50;
+	this->sun = Entity(&sunModel, glm::vec3(0.0f, 3150.0f, 0.0f));
+	this->moon = Entity(&moonModel, glm::vec3(0.0f, 3150.0f, 0.0f));
+	this->sun.scale = 150;
+	this->moon.scale = 150;
 }
 
 void gps::Scene::initTerrain(const char* texturePath,gps::Shader shader )
@@ -73,6 +78,11 @@ void gps::Scene::initializeSkybox(gps::Shader shader)
 {
 	skybox.initializeSkybox( shader);
 
+}
+
+void gps::Scene::initWater(gps::Shader waterShader)
+{
+	this->water.initializeWater(waterShader);
 }
 
 void gps::Scene::renderLights(Shader lightsshader)

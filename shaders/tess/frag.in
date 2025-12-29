@@ -52,7 +52,7 @@
         vec3 ambient  = light.ambient  * texColor;
         vec3 diffuse  = light.diffuse  * diff * texColor;
 
-        vec3 specular = light.specular * spec * 0.1;  //to lower the specular circle
+        vec3 specular = light.specular * spec * 0.05;  //to lower the specular circle
 
         return (ambient + diffuse + specular);
     }

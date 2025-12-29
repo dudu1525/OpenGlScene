@@ -26,7 +26,7 @@ gps::Window myWindow;
 
 ///////////////////////////// camera
 gps::Camera camera(
-    glm::vec3(0.0f, 200.0f, 400.0f),
+    glm::vec3(0.0f, 1600.0f, 400.0f),
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f),
     4111.0f);
@@ -38,14 +38,18 @@ float lastY = myWindow.getWindowDimensions().height / 2;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 int wireframeon = 0;
-/// ////////////////////////////
+bool _fullscreen = 1;
+/// ////////////////////////////binds
 GLboolean pressedKeys[1024];
+bool cursorEnabled = true;
 
 /////////////////////////// shaders
 gps::Shader myBasicShader;
 gps::Shader skyboxShader;
 gps::Shader terrainShader;
+gps::Shader waterShader;
 
+///////////////////////////////////////scene related
 gps::Scene scene;
 
 
@@ -129,6 +133,25 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
         }
     }
 
+    if (key == GLFW_KEY_V && action == GLFW_PRESS)
+    {
+        
+            glfwSetWindowMonitor(window, _fullscreen ? glfwGetPrimaryMonitor() : NULL, 0, 0, 1024, 768, GLFW_DONT_CARE);
+            _fullscreen = !_fullscreen;
+
+
+    }
+    if (key == GLFW_KEY_C and action == GLFW_PRESS)
+        {       if (cursorEnabled)
+         {
+         glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_CAPTURED);//hide mouse
+         }
+            else{
+        glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
+    cursorEnabled = !cursorEnabled;
+    }
+            
 
 
 
@@ -181,13 +204,12 @@ void initModels() {
 }
 
 void initShaders() {
-    myBasicShader.loadShader(
-        "shaders/basic.vert",
-        "shaders/basic.frag");
+    myBasicShader.loadShader("shaders/basic.vert","shaders/basic.frag");
     skyboxShader.loadShader( "shaders/skybox.vert","shaders/skybox.frag");
 
     terrainShader.loadMultipleShaders("shaders/tess/vert.in", "shaders/tess/frag.in", nullptr, "shaders/tess/tcs.in", "shaders/tess/tes.in");
-
+    
+    waterShader.loadShader("shaders/water.vert", "shaders/water.frag");
 
 }
 void initScene()
@@ -203,6 +225,7 @@ void initScene()
 
     scene.initTerrain("models/terrain/dessert.png", terrainShader);
 
+    scene.initWater(waterShader);
 }
 void initUniforms() {
     myBasicShader.useShaderProgram();
@@ -277,11 +300,12 @@ void renderScene() {
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection)); //set the projection for the uniform containing the view
     glUniform3fv(glGetUniformLocation(myBasicShader.shaderProgram, "viewPos"), 1, glm::value_ptr(camera.getPositionCamera()));
 
-
+   // printf("camera position:x:%f y:%f z:%f\n", camera.getPositionCamera().x, camera.getPositionCamera().y, camera.getPositionCamera().z);
 
 
    scene.renderTerrain(terrainShader, projection, camera);
     scene.renderLights(myBasicShader);
+    scene.renderWater(waterShader, projection, camera);
     scene.drawSkybox(skyboxShader, camera, projection);
     //skybox rendered last
 

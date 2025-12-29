@@ -8,6 +8,7 @@
 #include "Skybox.h"
 #include "Camera.hpp"
 #include "Terrain.h"
+#include "Water.h"
 using glm::vec3;
 
 namespace gps {
@@ -22,16 +23,21 @@ namespace gps {
 		void changeNightDayDirLight(Shader shader, Shader terrainShader);
 
 
-
-		void renderLights(Shader lightsshader);
-		void drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection);
-		void renderTerrain(Shader terrainShader, glm::mat4 projection, gps::Camera camera);
-
+		/////////////////////////////////////////////initializations
 
 		void initializeLights(vec3 direction, vec3 ambientD, vec3 diffuseD, vec3 specularD);
 		void initLightsModels();
 		void initTerrain(const char* texturePath, gps::Shader shader);
 		void initializeSkybox(Shader shader);
+		void initWater(gps::Shader waterShader);
+
+
+		/// //////////////////////////////////////////////////////rendering
+
+		void renderLights(Shader lightsshader);
+		void drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection);
+		void renderTerrain(Shader terrainShader, glm::mat4 projection, gps::Camera camera);
+		void renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera);
 		
 	private:
 		bool dayTime=true;
@@ -41,6 +47,7 @@ namespace gps {
 		Entity moon;
 		Skybox skybox;
 		Terrain terrain;
+		Water water;
 
 	};
 

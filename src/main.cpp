@@ -29,7 +29,7 @@ gps::Camera camera(
     glm::vec3(0.0f, 200.0f, 400.0f),
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f),
-    1111.0f);
+    4111.0f);
 bool firstMouse = true; 
 float lastX = myWindow.getWindowDimensions().width / 2; 
 float lastY = myWindow.getWindowDimensions().height / 2;
@@ -111,7 +111,7 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
         glfwSetWindowShouldClose(window, GL_TRUE);
     }
     if (key == GLFW_KEY_F && action == GLFW_PRESS) { 
-        scene.changeNightDayDirLight(myBasicShader);
+        scene.changeNightDayDirLight(myBasicShader, terrainShader);
     }
 
     if (key == GLFW_KEY_H && action == GLFW_PRESS) {

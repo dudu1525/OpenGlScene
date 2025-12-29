@@ -1,16 +1,58 @@
-#version 410 core
-in vec2 TexCoordFrag;
-out vec4 FragColor;
+    #version 410 core
+    in vec2 TexCoordFrag;
+    out vec4 FragColor;
 
-uniform sampler2D sandTexture;
+    //for lightning
+    in vec3 fNormalWorld;
+    in vec3 fPosWorld;
+
+    struct DirLight {
+        vec3 direction;
+        vec3 ambient;
+        vec3 diffuse;
+        vec3 specular;
+    };
+
+    uniform DirLight dirLight;
+    uniform vec3 viewPos;
+
+    uniform sampler2D sandTexture;
 
 
-void main() {
+    vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 
-        //vec3 color = texture(sandTexture, TexCoordFrag*100).rgb;
-        vec3 col1 = texture(sandTexture, TexCoordFrag * 20.0).rgb; 
-        vec3 col2 = texture(sandTexture, TexCoordFrag * 3).rgb;
-        vec3 finalCol = mix(col1, col2, 0.5);
 
-        FragColor = vec4(finalCol, 1.0);
-}
+    void main() {
+
+        vec3 normal = normalize(fNormalWorld);
+        vec3 viewDir = normalize(viewPos - fPosWorld); //vector towards camera for phong model
+
+        vec3 lightResult = CalcDirLight(dirLight, normal, viewDir);
+
+        FragColor = vec4(lightResult, 1.0);
+
+
+
+    }
+
+    vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir) {
+        vec3 lightDir = normalize(-light.direction);//inverse the direction, from terrain to 'sun'
+
+
+        float diff = max(dot(normal, lightDir), 0.0);
+
+
+        vec3 reflectDir = reflect(-lightDir, normal);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+
+
+        vec3 texColor = texture(sandTexture, TexCoordFrag).rgb;
+
+
+        vec3 ambient  = light.ambient  * texColor;
+        vec3 diffuse  = light.diffuse  * diff * texColor;
+
+        vec3 specular = light.specular * spec * 0.1;  //to lower the specular circle
+
+        return (ambient + diffuse + specular);
+    }

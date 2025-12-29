@@ -12,7 +12,7 @@ void gps::Scene::initializeLights(vec3 direction, vec3 ambientD, vec3 diffuseD, 
 	this->lightSources.setDirecLightParameters(direction, ambientD, diffuseD, specularD);
 }
 
-void gps::Scene::changeNightDayDirLight(Shader shader)
+void gps::Scene::changeNightDayDirLight(Shader shader, Shader terrainShader)
 {
 	shader.useShaderProgram();
 	if (dayTime)
@@ -34,6 +34,7 @@ void gps::Scene::changeNightDayDirLight(Shader shader)
 		this->lightSources.setDirecLightParameters(direction, ambientD, diffuseD, specularD);
 	}
 	lightSources.setLightUniforms(shader.shaderProgram);
+	terrain.setLightUniforms(terrainShader, lightSources);
 	skybox.changeFaces(!dayTime);
 }
 

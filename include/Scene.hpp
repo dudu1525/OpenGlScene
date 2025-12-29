@@ -19,7 +19,7 @@ namespace gps {
 		Scene();
 		LightSources lightSources;
 
-		void changeNightDayDirLight(Shader shader);
+		void changeNightDayDirLight(Shader shader, Shader terrainShader);
 
 
 

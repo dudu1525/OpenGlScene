@@ -1,20 +1,36 @@
 #version 410 core
 layout(quads, fractional_odd_spacing, ccw) in;
 uniform mat4 model, view, projection;
+uniform mat3 normalMatrix;
+
 in vec2 TextureCoord[];
+in vec3 Normals[];
+
 out vec2 TexCoordFrag;
+
+out vec3 fNormalWorld;
+out vec3 fPosWorld;
 
 void main() {
     float u = gl_TessCoord.x;
     float v = gl_TessCoord.y;
-
+    //interpolate texture
     vec2 t0 = mix(TextureCoord[0], TextureCoord[1], u);
     vec2 t1 = mix(TextureCoord[2], TextureCoord[3], u);
     TexCoordFrag = mix(t0, t1, v);
+    //interpolate normals
+    vec3 n0 = mix(Normals[0], Normals[1], u);
+    vec3 n1 = mix(Normals[2], Normals[3], u);
+    vec3 normal = mix(n0, n1, v);
 
+    //interpolate positions (to get those sub vertices)
     vec4 p0 = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, u);
     vec4 p1 = mix(gl_in[2].gl_Position, gl_in[3].gl_Position, u);
     vec4 p = mix(p0, p1, v);
+
+    //send further to fragment
+    fPosWorld = vec3(model * p);//converted to world space
+    fNormalWorld = normalize(normalMatrix * normal);//normalized 'world' normals
 
     gl_Position = projection * view * model * p;
 }

@@ -6,12 +6,16 @@ uniform mat4 model;
 uniform mat4 view;
 
 in vec2 TexCoord[];
+in vec3 Normal[];
+
 out vec2 TextureCoord[];
+out vec3 Normals[];
 
 void main()
 {
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
     TextureCoord[gl_InvocationID] = TexCoord[gl_InvocationID];
+    Normals[gl_InvocationID] = Normal[gl_InvocationID];
 
     if(gl_InvocationID == 0)
     {

@@ -26,7 +26,7 @@ gps::Window myWindow;
 
 ///////////////////////////// camera
 gps::Camera camera(
-    glm::vec3(0.0f, 1600.0f, 400.0f),
+    glm::vec3(0.0f, 1600.0f, 0.0f),
     glm::vec3(0.0f, 0.0f, 0.0f),
     glm::vec3(0.0f, 1.0f, 0.0f),
     4111.0f);
@@ -220,10 +220,12 @@ void initScene()
     glm::vec3 specularD(1.0f, 1.0f, 1.0f);
 
     scene.initializeLights(direction, ambientD, diffuseD, specularD);
-
+    scene.initializeSceneObjects();
     scene.initializeSkybox(skyboxShader);
 
-    scene.initTerrain("models/terrain/dessert.png", terrainShader);
+    scene.initTerrain("models/terrain/dessert.png","models/terrain/rough.png", terrainShader);
+
+   
 
     scene.initWater(waterShader);
 }
@@ -300,14 +302,15 @@ void renderScene() {
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection)); //set the projection for the uniform containing the view
     glUniform3fv(glGetUniformLocation(myBasicShader.shaderProgram, "viewPos"), 1, glm::value_ptr(camera.getPositionCamera()));
 
-   // printf("camera position:x:%f y:%f z:%f\n", camera.getPositionCamera().x, camera.getPositionCamera().y, camera.getPositionCamera().z);
+    printf("camera position:x:%f y:%f z:%f\n", camera.getPositionCamera().x, camera.getPositionCamera().y, camera.getPositionCamera().z);
 
 
    scene.renderTerrain(terrainShader, projection, camera);
     scene.renderLights(myBasicShader);
+    scene.renderTrees(myBasicShader);
     scene.renderWater(waterShader, projection, camera);
     scene.drawSkybox(skyboxShader, camera, projection);
-    //skybox rendered last
+    //skybox rendered last!!
 
 
 }

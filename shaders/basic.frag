@@ -26,7 +26,11 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 
 
 void main() 
-{
+{ 
+//discard alpha channel
+if(texture(diffuseTexture, fTexCoords).a < 0.1) {
+        discard;
+    }
 
     vec3 normal = normalize(fNormalWorld);
      vec3 viewDir = normalize(viewPos - fPosWorld); 

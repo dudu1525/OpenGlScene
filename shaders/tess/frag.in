@@ -17,6 +17,7 @@
     uniform vec3 viewPos;
 
     uniform sampler2D sandTexture;
+    uniform sampler2D roughTexture;
 
 
     vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
@@ -25,6 +26,10 @@
     void main() {
 
         vec3 normal = normalize(fNormalWorld);
+
+
+
+
         vec3 viewDir = normalize(viewPos - fPosWorld); //vector towards camera for phong model
 
         vec3 lightResult = CalcDirLight(dirLight, normal, viewDir);
@@ -43,16 +48,18 @@
 
 
         vec3 reflectDir = reflect(-lightDir, normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
 
+        float roughness = texture(roughTexture, TexCoordFrag).r; //take the roughness texture
+        float shininess = mix(128.0, 2.0, roughness);  //interpolate between 128 and 2
 
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
         vec3 texColor = texture(sandTexture, TexCoordFrag).rgb;
 
 
         vec3 ambient  = light.ambient  * texColor;
         vec3 diffuse  = light.diffuse  * diff * texColor;
 
-        vec3 specular = light.specular * spec * 0.05;  //to lower the specular circle
+        vec3 specular = light.specular * spec *  roughness * 0.03;;  //to lower the specular circle
 
         return (ambient + diffuse + specular);
     }

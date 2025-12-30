@@ -3,15 +3,17 @@
 #include <glm/gtc/noise.hpp>
 #include <cmath>
 
-void Terrain::initializeTerrain(const char* texturePath, gps::Shader terrainShader, gps::LightSources lights)
+void Terrain::initializeTerrain(const char* texturePath,const char* roughPath, gps::Shader terrainShader, gps::LightSources lights)
 {
-    //load texture
+    //load first texture
     int textureWidth, textureHeight, nrChannels;
     stbi_set_flip_vertically_on_load(true);
     unsigned char* data = stbi_load(texturePath, &textureWidth, &textureHeight, &nrChannels, 0);
 
     glGenTextures(1, &this->sandTexture);
     glBindTexture(GL_TEXTURE_2D, this->sandTexture);
+   // glGenTextures(1, &this->roughTexture);
+   // glBindTexture(GL_TEXTURE_2D, this->roughTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -22,15 +24,30 @@ void Terrain::initializeTerrain(const char* texturePath, gps::Shader terrainShad
         glGenerateMipmap(GL_TEXTURE_2D);
         stbi_image_free(data);
     }
+    //second texture
+    unsigned char* data2 = stbi_load(roughPath, &textureWidth, &textureHeight, &nrChannels, 3);
+    glGenTextures(1, &this->roughTexture);
+    glBindTexture(GL_TEXTURE_2D, this->roughTexture);
+    if (data) {
+
+        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_SRGB;
+        glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth, textureHeight, 0, format, GL_UNSIGNED_BYTE, data2);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(data2);
+    }
+
+    //normals
+
+
 
 
     //with help of learnOpenGl.com - heightmaps
     //set vertices
-    for (int i = 0; i < rez; i++) {
-        for (int j = 0; j < rez; j++) {
+    for (int i = 0; i < REZ; i++) {
+        for (int j = 0; j < REZ; j++) {
             //position                  //divide by rez, to get the 'unit' = width/(rez-1) and height/(rez-1)
-            float x = -width / 2.0f + (float)i * width / (rez - 1); //towards pozitive values, from left to right
-            float z = -height / 2.0f + (float)j * height / (rez - 1);//towards pozitive, from 'bottom' to top
+            float x = -WIDTH / 2.0f + (float)i * WIDTH / (REZ - 1); //towards pozitive values, from left to right
+            float z = -HEIGHT / 2.0f + (float)j * HEIGHT / (REZ - 1);//towards pozitive, from 'bottom' to top
             vertices.push_back(x); //x
             float y = perlinNoise(x, z);
                 vertices.push_back(y);
@@ -41,20 +58,20 @@ void Terrain::initializeTerrain(const char* texturePath, gps::Shader terrainShad
             vertices.push_back(n.y);
             vertices.push_back(n.z);
             //textures
-            vertices.push_back((float)i / (rez - 1)*50);       //first divide the 0 to 1 to (rez-1) parts            
-            vertices.push_back((float)j / (rez - 1)*50);                   //then obtain 50x50 -> 2500 total textures across the terrain
+            vertices.push_back((float)i / (REZ - 1)*50);       //first divide the 0 to 1 to (rez-1) parts            
+            vertices.push_back((float)j / (REZ - 1)*50);                   //then obtain 50x50 -> 2500 total textures across the terrain
         }
     }
 
 
 
     //ebo
-    for (int i = 0; i < rez - 1; i++) {//width
-        for (int j = 0; j < rez - 1; j++) {//height
-            indices.push_back(i * rez + j);
-            indices.push_back((i + 1) * rez + j);
-            indices.push_back(i * rez + (j + 1));
-            indices.push_back((i + 1) * rez + (j + 1));
+    for (int i = 0; i < REZ - 1; i++) {//width
+        for (int j = 0; j < REZ - 1; j++) {//height
+            indices.push_back(i * REZ + j);
+            indices.push_back((i + 1) * REZ + j);
+            indices.push_back(i * REZ + (j + 1));
+            indices.push_back((i + 1) * REZ + (j + 1));
         }
     }
 
@@ -88,17 +105,22 @@ void Terrain::renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps
 {
     terrainShader.useShaderProgram();
 
-    //bind and activate texture 'sandTexture'
+    ///////////////////////////////////////////////bind and activate texture 'sandTexture'
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, this->sandTexture);
     glUniform1i(glGetUniformLocation(terrainShader.shaderProgram, "sandTexture"), 1);
 
-    //send model, view, projection
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, roughTexture);
+    glUniform1i(glGetUniformLocation(terrainShader.shaderProgram, "roughTexture"), 2);
+
+
+    /////////////////////////////////////send model, view, projection
     glUniformMatrix4fv(glGetUniformLocation(terrainShader.shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(glGetUniformLocation(terrainShader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
     
     
-    // world transformation and send uniforms
+    ////////////////////////////////////// world transformation and send uniforms
     glm::mat4 model = glm::mat4(1.0f);
     glm::mat3 normalMatrix = glm::mat3(glm::transpose(glm::inverse(model)));
     glUniformMatrix4fv(glGetUniformLocation(terrainShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -108,7 +130,7 @@ void Terrain::renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps
     // render the vertices
     glBindVertexArray(terrainVAO);
     glDisable(GL_CULL_FACE);
-    glDrawElements(GL_PATCHES, (rez-1) * (rez-1) * 4, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_PATCHES, (REZ -1) * (REZ -1) * 4, GL_UNSIGNED_INT, 0);
     glEnable(GL_CULL_FACE);
 }
 
@@ -121,8 +143,8 @@ void Terrain::setLightUniforms(gps::Shader terrainShader, gps::LightSources ligh
 
 float Terrain::perlinNoise(float x, float z)
 {
-    float nx = x / (width / 2.0f);//normalize the x and y to -1 1
-    float nz = z / (height / 2.0f);
+    float nx = x / (WIDTH / 2.0f);//normalize the x and y to -1 1
+    float nz = z / (HEIGHT / 2.0f);
     float squareDist = glm::max(glm::abs(nx), glm::abs(nz));//take max value from positive values
 
     //apply 2 times the perlin, more realistic this way
@@ -130,13 +152,27 @@ float Terrain::perlinNoise(float x, float z)
     float noiseValue = (glm::perlin(glm::vec2(x * freq, z * freq)) + 1.0f) * 0.5f;
 
     float detail = (glm::perlin(glm::vec2(x * 0.0005f, z * 0.0005f)) + 1.0f) * 0.5f;
-    float combinedNoise = (noiseValue * 0.8f) + (detail * 0.2f);
+    float combinedNoise = (noiseValue * 0.95f) + (detail * 0.05f);
 
         //smoother inner part for the 'lake'
-    float innerMask = glm::smoothstep(0.0f, 0.5f, squareDist);
-    float mountains = combinedNoise * innerMask;
+    float innerPart = glm::smoothstep(0.0f, 0.5f, squareDist);//up to 50% of map, smoother the mountains
+    float mountains = combinedNoise * innerPart;
 
-    return pow(mountains, 1.5f) * maxh;
+    float finalHeight= pow(mountains, 1.5f) * maxh; //before marking the 'small lake'
+    //make an elypse for the oasis
+    float xcomp = 1.8f;
+    float zcomp = 1.0f;
+    float ellipticalDist = glm::length(glm::vec2(nx / xcomp, nz / zcomp));
+    float oasisSize = 0.17f;//percentage of how much is lake
+    float oasisDepth = 2515.0f;//depth of oasis
+        //as you approach center, the lake is deeper
+    float oasis = 1.0f - glm::smoothstep(0.0f, oasisSize, ellipticalDist);
+
+
+    // Subtract from finalheight, in order to obtain the depth
+    return finalHeight - (oasis * oasisDepth);
+
+
 }
 
 //function to calculate normals of a vertex based on 'neighbouring' elements and taking the 'slope'

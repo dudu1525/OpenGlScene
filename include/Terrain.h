@@ -26,9 +26,14 @@ const unsigned int NUM_PATCH_PTS = 4;
 class Terrain {
 
 public:
+#define WIDTH 48048
+#define HEIGHT 48048
+#define REZ 128
+
+
 	Terrain() {}
 	//new
-	void initializeTerrain(const char* texturePath, gps::Shader terrainShader, gps::LightSources lights);
+	void initializeTerrain(const char* texturePath,const char* roughPath, gps::Shader terrainShader, gps::LightSources lights);
 	void renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps::Camera camera);
 	void setLightUniforms(gps::Shader terrainShader, gps::LightSources lights);
 private:
@@ -40,10 +45,10 @@ private:
 	unsigned int terrainVAO, terrainVBO, terrainEBO;
 
 
-	int height=48048, width = 48048;//2048 - units of the map
-	int maxh = 7450;
+	//int height=48048, width = 48048;//2048 - units of the map
+	int maxh = 4449;//prev 7450, now 4450
 
-	const unsigned int rez = 128; //64x64 triangles that are further tessellated to max 1024 per vertex
+	//const unsigned int rez = 128; //64x64 triangles that are further tessellated to max 1024 per vertex
 	std::vector<float> vertices;
 	std::vector<unsigned int> indices;
 	//std::vector<float> heights;
@@ -52,7 +57,9 @@ private:
 
 
 	unsigned int sandTexture;
-
+	unsigned int roughTexture;
+	unsigned int normalmaptexture;
+	const char* normals = "models/terrain/normals.png";
 
 };
 

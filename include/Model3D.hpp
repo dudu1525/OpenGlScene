@@ -40,7 +40,7 @@ namespace gps {
 
 		void CreateDefaultTexture();
 		GLuint defaultWhiteTexture = 0;
-
+		GLuint defaultRoughTexture;
     };
 }
 

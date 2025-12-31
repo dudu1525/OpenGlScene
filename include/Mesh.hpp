@@ -29,7 +29,7 @@ namespace gps {
     struct Texture {
 
         GLuint id;
-        //ambientTexture, diffuseTexture, specularTexture
+        //ambientTexture, diffuseTexture, specularTexture, roughnessTexture
         std::string type;
         std::string path;
     };

@@ -75,7 +75,17 @@ void gps::Scene::renderSceneObjects(Shader basicShader)
 	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(pierNormal));
 	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(pier.getModelMatrix()));
 	pier.getModel()->Draw(basicShader);
-	////////////////////////////////////////////////
+	////////////////////////////////////////////////tent
+	glm::mat3 tentNormal = glm::mat3(glm::inverseTranspose(tent.getModelMatrix()));
+	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(tentNormal));
+	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(tent.getModelMatrix()));
+	tent.getModel()->Draw(basicShader);
+	///////////////////////////////////////////campfire
+	glm::mat3 campfireNormal = glm::mat3(glm::inverseTranspose(campfire.getModelMatrix()));
+	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(campfireNormal));
+	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(campfire.getModelMatrix()));
+	campfire.getModel()->Draw(basicShader);
+	////////////////////////////////////////////
 	glm::mat3 fernnor = glm::mat3(glm::inverseTranspose(ferns.at(0).getModelMatrix()));
 	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(fernnor));
 	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(ferns.at(0).getModelMatrix()));
@@ -240,13 +250,25 @@ void gps::Scene::initializeSceneObjects()
 	palmtreeModel.LoadModel("models/trees/palm_tree.obj");
 	tropicalfern2.LoadModel("models/weeds/TropicFern01.obj");
 	pierModel.LoadModel("models/outerworld/pier.obj");
-	//create entities where needed
+	campfireModel.LoadModel("models/outerworld/campfire.obj");
+	tentModel.LoadModel("models/outerworld/tent/tent.obj");
+	//pier
 	pier= Entity(&pierModel, glm::vec3(1200.0, -280.0f,3900.0f ));
 	pier.rotation = glm::vec3(0, 270, 0);
 	pier.scale = 120;
 	pier.scaleY = 1.5f;
-	///////////
+	//tent
+	tent = Entity(&tentModel, glm::vec3(4800.0f, 220.0f, 8300.0f));
+	tent.rotation = glm::vec3(0, 200, 0);
+	glm::vec3 normal = terrain.getNormal(4800.0f, 8300.0f);
+	tent.updateRotationFromNormal(normal);
+	tent.scale = 555.0;
+	///campfire
+	campfire = Entity(&campfireModel, glm::vec3(4300.0, 312.0f, 6300.0f));
+	campfire.rotation = glm::vec3(0, 290, 0);
+	campfire.scale = 120;
 
+	///////
 	Entity e(&tropicalfern2, glm::vec3(7000.0, 405.0, 1010.0f));
 	e.scale = 200;
 	e.rotation = glm::vec3(-90, 0, 0);

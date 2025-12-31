@@ -174,6 +174,22 @@ namespace gps {
 
 					}
 
+					//roughness texture (if given)
+				//	std::string roughnessTexturePath = materials[materialId].roughness_texname;
+				//	if (!roughnessTexturePath.empty())
+				//	{
+					//	gps::Texture currentTexture;
+					//	currentTexture = LoadTexture(basePath + specularTexturePath, "roughnessTexture");
+				//		textures.push_back(currentTexture);
+				//	}
+				//	else
+				//	{
+				//		gps::Texture defaultTex;
+					//	defaultTex.id = defaultRoughTexture;
+				//		defaultTex.type = "roughnessTexture";
+					//	defaultTex.path = "";
+				//		textures.push_back(defaultTex);
+				//	}
 
 
 
@@ -280,13 +296,19 @@ namespace gps {
 	{
 		if (defaultWhiteTexture != 0) return;
 
-		unsigned char whitePixel[] = { 255, 255, 255, 255 };
+		unsigned char whitePixel[] = { 255, 255, 255, 255 };//white
 		glGenTextures(1, &defaultWhiteTexture);
 		glBindTexture(GL_TEXTURE_2D, defaultWhiteTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whitePixel);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+
+		//unsigned char roughnessPixel[] = { 180, 180, 180, 255 };//grey
+		//glGenTextures(1, &defaultRoughTexture);
+		//glBindTexture(GL_TEXTURE_2D, defaultRoughTexture);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, roughnessPixel);
 
 	}
 

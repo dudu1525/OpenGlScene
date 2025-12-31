@@ -54,10 +54,14 @@ namespace gps {
 		gps::Model3D tropicalfern2;
 		gps::Model3D palmtreeModel;
 		gps::Model3D pierModel;
+		gps::Model3D tentModel;
+		gps::Model3D campfireModel;
 		/// entities
+		Entity campfire;
 		Entity sun;
 		Entity moon;
 		Entity pier;
+		Entity tent;
 		std::vector<Entity> palmtree;//load more of these and displace them
 		std::vector<Entity> ferns;
 		////////////////////////////other aspects

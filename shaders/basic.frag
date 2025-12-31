@@ -30,6 +30,7 @@ uniform vec3 viewPos;
 // textures of object
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
+//uniform sampler2D roughnessTexture;
 
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
@@ -59,6 +60,10 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+
+    
+    //float roughness = texture(roughnessTexture, fTexCoords).r;
+
 
     vec3 texDiffuse = texture(diffuseTexture, fTexCoords).rgb;
     vec3 texSpecular = texture(specularTexture, fTexCoords).rgb;

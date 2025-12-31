@@ -36,10 +36,12 @@ public:
 	void initializeTerrain(const char* texturePath,const char* roughPath, gps::Shader terrainShader, gps::LightSources lights);
 	void renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps::Camera camera);
 	void setLightUniforms(gps::Shader terrainShader, gps::LightSources lights);
+
+	glm::vec3 getNormal(float x, float z);
 private:
 	
 	float perlinNoise(float x, float z);
-	glm::vec3 getNormal(float x, float z);
+
 
 	//new
 	unsigned int terrainVAO, terrainVBO, terrainEBO;

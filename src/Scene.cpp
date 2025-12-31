@@ -10,7 +10,7 @@ gps::Scene::Scene()
 
 void gps::Scene::initializeLights(vec3 direction, vec3 ambientD, vec3 diffuseD, vec3 specularD)
 {
-
+	//need to be sent once in initialization as it doesent change
 	this->lightSources.setDirecLightParameters(direction, ambientD, diffuseD, specularD);
 }
 
@@ -58,10 +58,10 @@ void gps::Scene::renderWater(Shader waterShader, glm::mat4 projection, gps::Came
 	this->water.renderWater(waterShader, projection, camera);
 }
 
-void gps::Scene::renderTrees(Shader basicShader)
+void gps::Scene::renderSceneObjects(Shader basicShader)
 {
 	basicShader.useShaderProgram();
-	///need to separate those
+	///////////////////////////////////////////PALM TREES
 	glDisable(GL_CULL_FACE);
 	for (int i = 0; i < palmtree.size(); i++)
 	{
@@ -70,6 +70,16 @@ void gps::Scene::renderTrees(Shader basicShader)
 		glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(palmtree.at(i).getModelMatrix()));
 		palmtree.at(i).getModel()->Draw(basicShader);
 	}
+	/////////////////////////////////////////////PIER
+	glm::mat3 pierNormal = glm::mat3(glm::inverseTranspose(pier.getModelMatrix()));
+	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(pierNormal));
+	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(pier.getModelMatrix()));
+	pier.getModel()->Draw(basicShader);
+	////////////////////////////////////////////////
+	glm::mat3 fernnor = glm::mat3(glm::inverseTranspose(ferns.at(0).getModelMatrix()));
+	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(fernnor));
+	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(ferns.at(0).getModelMatrix()));
+	ferns.at(0).getModel()->Draw(basicShader);
 
 	glEnable(GL_CULL_FACE);
 
@@ -78,7 +88,7 @@ void gps::Scene::renderTrees(Shader basicShader)
 void gps::Scene::positionTrees()
 { //width = width of the terrain on X axis
 	//height = size of the terrain on Z axis
-	srand(4);//1 or 4 
+	srand(11);//1 or 4 
 	//one more idea to make generating more complex and more natural
 	// would be to put all the indeces between maxi and mini in another vector, where duplicates exist
 	// but duplicate by 100%, 50% the ones closer to the center, so they have a higher chance to appear
@@ -89,14 +99,14 @@ void gps::Scene::positionTrees()
 	// could also generate multiple ellipses and between the ones closer to the oasis, generate more trees
 	// 
 	//positive x
-	int maxi = REZ - 10;
+	int maxi = REZ - 40;
 	int mini = (innerWidth + WIDTH / 2.0f) * (REZ - 1) / WIDTH;//max i for which the width is over innerHeight
 
-	int maxj = REZ - 10;
-	int minj = 10;
+	int maxj = REZ - 40;
+	int minj = 40;
 
 	//generate x and z between the 2 bounds for x and z
-	for (int i=0;i<50;i++)
+	for (int i=0;i<11;i++)
 	{
 		int randomI = mini + rand() % (maxi - mini + 1);
 		int randomJ = minj + rand() % (maxj - minj + 1);
@@ -111,8 +121,8 @@ void gps::Scene::positionTrees()
 	}
 	//negative x
 	maxi = (-innerWidth + WIDTH / 2.0f) * (REZ - 1) / WIDTH;
-	mini = 10;
-	for (int i = 0; i < 50; i++)
+	mini = 40;
+	for (int i = 0; i < 11; i++)
 	{
 		int randomI = mini + rand() % (maxi - mini + 1);
 		int randomJ = minj + rand() % (maxj - minj + 1);
@@ -127,11 +137,11 @@ void gps::Scene::positionTrees()
 	}
 	//positive z
 	maxi = REZ - 40;
-	mini = 40;
-	maxj = REZ-10;
+	mini = 45;
+	maxj = REZ-40;
 	minj = (innerHeight + HEIGHT / 2.0f) * (REZ - 1) / HEIGHT;
 
-	for (int i = 0; i < 31; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		int randomI = mini + rand() % (maxi - mini + 1);
 		int randomJ = minj + rand() % (maxj - minj + 1);
@@ -146,8 +156,8 @@ void gps::Scene::positionTrees()
 	}
 	//negative z
 	maxj= (-innerHeight + HEIGHT / 2.0f) * (REZ - 1) / HEIGHT;
-	minj = 10;
-	for (int i = 0; i < 31; i++)
+	minj = 40;
+	for (int i = 0; i < 10; i++)
 	{
 		int randomI = mini + rand() % (maxi - mini + 1);
 		int randomJ = minj + rand() % (maxj - minj + 1);
@@ -226,8 +236,22 @@ void gps::Scene::initializeSkybox(gps::Shader shader)
 }
 
 void gps::Scene::initializeSceneObjects()
-{
+{	//load models
 	palmtreeModel.LoadModel("models/trees/palm_tree.obj");
+	tropicalfern2.LoadModel("models/weeds/TropicFern01.obj");
+	pierModel.LoadModel("models/outerworld/pier.obj");
+	//create entities where needed
+	pier= Entity(&pierModel, glm::vec3(1200.0, -280.0f,3900.0f ));
+	pier.rotation = glm::vec3(0, 270, 0);
+	pier.scale = 120;
+	pier.scaleY = 1.5f;
+	///////////
+
+	Entity e(&tropicalfern2, glm::vec3(7000.0, 405.0, 1010.0f));
+	e.scale = 200;
+	e.rotation = glm::vec3(-90, 0, 0);
+	ferns.push_back(e);
+
 	positionTrees();
 }
 

@@ -27,6 +27,7 @@ public:
     glm::vec3 position;
     glm::vec3 rotation;
     float scale;
+    float scaleY=1.0;
     Entity() {}
     Entity(gps::Model3D* m, glm::vec3 pos) : model(m), position(pos), rotation(0, 0, 0), scale(1.0f) {}
 
@@ -35,7 +36,7 @@ public:
         m = glm::rotate(m, glm::radians(rotation.x), glm::vec3(1, 0, 0));
         m = glm::rotate(m, glm::radians(rotation.y), glm::vec3(0, 1, 0));
         m = glm::rotate(m, glm::radians(rotation.z), glm::vec3(0, 0, 1));
-        m = glm::scale(m, glm::vec3(scale));
+        m = glm::scale(m, glm::vec3(scale, scale * scaleY, scale));
         return m;
     }
 

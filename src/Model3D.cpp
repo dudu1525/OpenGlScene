@@ -52,7 +52,13 @@ namespace gps {
 			std::vector<gps::Vertex> vertices;
 			std::vector<GLuint> indices;
 			std::vector<gps::Texture> textures;
-
+			gps::Material currentMaterial;
+			currentMaterial.ambient = glm::vec3(0.2f);
+			currentMaterial.diffuse = glm::vec3(1.0f);
+			currentMaterial.specular = glm::vec3(1.0f);
+			currentMaterial.shininess = 32.0f;
+			currentMaterial.refraction = 1.0f;
+			currentMaterial.opacity = 1.0f;
 			// Loop over faces(polygon)
 			size_t index_offset = 0;
 			for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
@@ -108,11 +114,15 @@ namespace gps {
 
 				materialId = shapes[s].mesh.material_ids[0];
 				if (materialId != -1) {
-
-					gps::Material currentMaterial;
+					//extract materials
 					currentMaterial.ambient = glm::vec3(materials[materialId].ambient[0], materials[materialId].ambient[1], materials[materialId].ambient[2]);
 					currentMaterial.diffuse = glm::vec3(materials[materialId].diffuse[0], materials[materialId].diffuse[1], materials[materialId].diffuse[2]);
 					currentMaterial.specular = glm::vec3(materials[materialId].specular[0], materials[materialId].specular[1], materials[materialId].specular[2]);
+					currentMaterial.shininess = materials[materialId].shininess; 
+					currentMaterial.refraction = materials[materialId].ior;     
+					currentMaterial.opacity = materials[materialId].dissolve;
+
+
 					std::cout << "Material ID: " << materialId << std::endl;
 					std::cout << "Diffuse texname: '" << materials[materialId].diffuse_texname << "'" << std::endl;
 
@@ -143,7 +153,7 @@ namespace gps {
 						textures.push_back(defaultTex);
 
 					}
-					
+
 
 					//specular texture
 					std::string specularTexturePath = materials[materialId].specular_texname;
@@ -166,15 +176,16 @@ namespace gps {
 
 
 
-					
+
 
 
 
 				}
+				else printf("SOMETHING WENT WRONG WITH GETTING TEXTURE!\n");
 			}
 
-		
-			meshes.push_back(gps::Mesh(vertices, indices, textures));
+		//push the found values into a mesh object
+			meshes.push_back(gps::Mesh(vertices, indices, textures, currentMaterial));
 		}
 	}
 

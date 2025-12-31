@@ -307,7 +307,7 @@ void renderScene() {
 
    scene.renderTerrain(terrainShader, projection, camera);
     scene.renderLights(myBasicShader);
-    scene.renderTrees(myBasicShader);
+    scene.renderSceneObjects(myBasicShader);
     scene.renderWater(waterShader, projection, camera);
     scene.drawSkybox(skyboxShader, camera, projection);
     //skybox rendered last!!

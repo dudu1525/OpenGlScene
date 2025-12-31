@@ -40,7 +40,7 @@ namespace gps {
 		void drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection);
 		void renderTerrain(Shader terrainShader, glm::mat4 projection, gps::Camera camera);
 		void renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera);
-		void renderTrees(Shader basicShader);
+		void renderSceneObjects(Shader basicShader);
 		///////////////////////////////////////////////////////////////misc
 		//x - width, z - height  ->perpendicular to the longer part of the oasis
 		int outerWidth=13000, outerHeight=12000, innerWidth=5300, innerHeight=3600;//+- 
@@ -48,18 +48,22 @@ namespace gps {
 		int maxh = 4449; //from terrain.cpp, height multiplier
 	private:
 		bool dayTime=true;
+		//models for entities
 		gps::Model3D sunModel;
 		gps::Model3D moonModel;
+		gps::Model3D tropicalfern2;
+		gps::Model3D palmtreeModel;
+		gps::Model3D pierModel;
+		/// entities
 		Entity sun;
 		Entity moon;
+		Entity pier;
+		std::vector<Entity> palmtree;//load more of these and displace them
+		std::vector<Entity> ferns;
+		////////////////////////////other aspects
 		Skybox skybox;
 		Terrain terrain;
 		Water water;
-	
-		gps::Model3D palmtreeModel;
-		std::vector<Entity> palmtree;//load more of these and displace them
-
-
 		////////////////////////////////////////////////helper functions
 		float perlinNoise(float x, float z);
 

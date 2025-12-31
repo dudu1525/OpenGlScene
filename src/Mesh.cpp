@@ -2,12 +2,12 @@
 namespace gps {
 
 	/* Mesh Constructor */
-	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures) {
+	Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures, Material materials) {
 
 		this->vertices = vertices;
 		this->indices = indices;
 		this->textures = textures;
-
+		this->materials = materials;
 		this->setupMesh();
 	}
 
@@ -19,6 +19,16 @@ namespace gps {
 	void Mesh::Draw(gps::Shader shader)	{
 
 		shader.useShaderProgram();
+
+		//an improvement for the future >> save the getUniformLocation into some gluints
+		//setup material properties
+		glUniform3fv(glGetUniformLocation(shader.shaderProgram, "material.ambient"), 1, glm::value_ptr(materials.ambient));
+		glUniform3fv(glGetUniformLocation(shader.shaderProgram, "material.diffuse"), 1, glm::value_ptr(materials.diffuse));
+		glUniform3fv(glGetUniformLocation(shader.shaderProgram, "material.specular"), 1, glm::value_ptr(materials.specular));
+		glUniform1f(glGetUniformLocation(shader.shaderProgram, "material.shininess"), materials.shininess);
+		glUniform1f(glGetUniformLocation(shader.shaderProgram, "material.refraction"), materials.refraction);
+		glUniform1f(glGetUniformLocation(shader.shaderProgram, "material.opacity"), materials.opacity);
+
 
 		//set textures
 		for (GLuint i = 0; i < textures.size(); i++) {
@@ -37,6 +47,9 @@ namespace gps {
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
+
+
+
 
     }
 

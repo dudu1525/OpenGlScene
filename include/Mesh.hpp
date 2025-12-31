@@ -10,7 +10,7 @@
 #endif
 
 #include <glm/glm.hpp>
-
+#include <glm/gtc/type_ptr.hpp> 
 #include "Shader.hpp"
 
 #include <string>
@@ -36,9 +36,13 @@ namespace gps {
 
     struct Material {
 
-        glm::vec3 ambient;
-        glm::vec3 diffuse;
-        glm::vec3 specular;
+        glm::vec3 ambient;//Ka
+        glm::vec3 diffuse;//Kd
+        glm::vec3 specular;//Ks
+        float shininess;//Ns
+        float refraction;//Ni
+        float opacity;//d
+
     };
 
     struct Buffers {
@@ -53,8 +57,9 @@ namespace gps {
         std::vector<Vertex> vertices;
         std::vector<GLuint> indices;
         std::vector<Texture> textures;
+        Material materials;
 
-	    Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures);
+	    Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures, Material materials);
 
 	    Buffers getBuffers();
 

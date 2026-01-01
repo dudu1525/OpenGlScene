@@ -12,6 +12,16 @@ void gps::Scene::initializeLights(vec3 direction, vec3 ambientD, vec3 diffuseD, 
 {
 	//need to be sent once in initialization as it doesent change
 	this->lightSources.setDirecLightParameters(direction, ambientD, diffuseD, specularD);
+
+
+	glm::vec3 position(4350.0, 812.0f, 6300.0f);
+	glm::vec3 ambientp(0.0f, 0.0f, 0.0f);
+	glm::vec3 diffusep(12.0f, 6.0f, 3.0f);
+	glm::vec3 specularp(1.0f, 0.8f, 0.4f);
+	float linear = 0.0014;
+	float quadratic = 0.00002f;
+	this->lightSources.setPointLightParameters(position, ambientp, diffusep, specularp, linear, quadratic);
+
 }
 
 void gps::Scene::changeNightDayDirLight(Shader shader, Shader terrainShader)

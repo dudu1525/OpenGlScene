@@ -8,6 +8,19 @@ struct DirLight {
     vec3 diffuse;
     vec3 specular;
 };
+
+struct PointLight {    
+    vec3 position;
+    
+    float constant;
+    float linear;
+    float quadratic;  
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+}; 
+
 //properties given by materials of object
 struct Material {
      vec3 ambient;//Ka
@@ -24,6 +37,7 @@ in vec3 fNormalWorld;
 in vec2 fTexCoords;
 
 uniform DirLight dirLight;
+uniform PointLight pointlight;
 uniform Material material;
 uniform vec3 viewPos;
 
@@ -34,7 +48,7 @@ uniform sampler2D specularTexture;
 
 
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
-
+vec3 CalcPointLight(PointLight light, vec3 normal,vec3 fragPos, vec3 viewDir);
 
 
 void main() 
@@ -49,6 +63,8 @@ if(texture(diffuseTexture, fTexCoords).a < 0.1) {
 
     vec3 lightResult = CalcDirLight(dirLight, normal, viewDir);
 
+    lightResult += CalcPointLight(pointlight,normal,fPosWorld,viewDir  );
+    // vec3 lightResult = CalcPointLight(pointlight,normal,fPosWorld,viewDir  );
     fColor = vec4(lightResult, material.opacity);
 }
 
@@ -74,3 +90,25 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 
     return (ambient + diffuse + specular);
 }
+//from learn opengl. com
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
+{
+    vec3 lightDir = normalize(light.position - fragPos);
+    // diffuse shading
+    float diff = max(dot(normal, lightDir), 0.0);
+    // specular shading
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    // attenuation
+    float distance    = length(light.position - fragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + 
+  			     light.quadratic * (distance * distance));    
+
+    vec3 texDiffuse = texture(diffuseTexture, fTexCoords).rgb;
+    vec3 texSpecular = texture(specularTexture, fTexCoords).rgb;
+
+    vec3 ambient  = light.ambient  * texDiffuse * material.ambient;
+    vec3 diffuse  = light.diffuse  * diff * texDiffuse * material.diffuse;
+    vec3 specular = light.specular * spec * texSpecular * material.specular;
+    return (ambient + diffuse + specular)*attenuation;
+} 

@@ -40,8 +40,8 @@ public:
         return m;
     }
     void updateRotationFromNormal(glm::vec3 n) {//update x and z rotation based on terrain normal
-        float pitch = glm::degrees(atan2(n.z, n.y));
-        float roll = glm::degrees(atan2(-n.x, n.y));
+        float pitch = glm::degrees(atan2(n.z, n.y));//get x on Z-Y plane (rotation around plane not contained)
+        float roll = glm::degrees(atan2(-n.x, n.y));//get z on X-Y plane ^same
         this->rotation.x = pitch;
         this->rotation.z = roll;
     }

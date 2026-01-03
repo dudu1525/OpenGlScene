@@ -17,7 +17,7 @@
 #include "Shader.hpp"
 #include "Camera.hpp"
 #include "Model3D.hpp"
-
+#include <random>
 #include <iostream>
 #include "Scene.hpp"
 #include "LightSources.h"
@@ -39,6 +39,8 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 int wireframeon = 0;
 bool _fullscreen = 1;
+float fireTime = 0.0f;//used to change the color of the point light around the fire
+
 /// ////////////////////////////binds
 GLboolean pressedKeys[1024];
 bool cursorEnabled = true;
@@ -48,7 +50,7 @@ gps::Shader myBasicShader;
 gps::Shader skyboxShader;
 gps::Shader terrainShader;
 gps::Shader waterShader;
-
+gps::Shader fireShader;
 ///////////////////////////////////////scene related
 gps::Scene scene;
 
@@ -211,6 +213,8 @@ void initShaders() {
     
     waterShader.loadShader("shaders/water.vert", "shaders/water.frag");
 
+    fireShader.loadShader("shaders/fire.vert", "shaders/fire.frag");
+
 }
 void initScene()
 {   //initialize directional light - bright
@@ -225,7 +229,7 @@ void initScene()
 
     scene.initTerrain("models/terrain/dessert.png","models/terrain/rough.png", terrainShader);
 
-   
+    scene.initFire(fireShader);
 
     scene.initWater(waterShader);
 }
@@ -292,11 +296,28 @@ void processMovement() {
 
 
 
-void renderScene() {
+void renderScene(float deltaTime) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //objects all generally share this view, projection matrixes
     view = camera.getViewMatrix();
     myBasicShader.useShaderProgram();
+    fireTime += deltaTime;
+    if (fireTime >= 0.3f)
+    {
+      
+        float min = 0.0014;
+        float max = 0.014;
+        float randomval = min + (float)(rand()) / ((float)(0x7fff / (max - min)));
+
+        glUniform1f(glGetUniformLocation(myBasicShader.shaderProgram, "pointlight.linear"), randomval);
+
+        terrainShader.useShaderProgram();
+        glUniform1f(glGetUniformLocation(terrainShader.shaderProgram, "pointlight.linear"), randomval);
+        fireTime = 0.0f;
+
+    }
+    myBasicShader.useShaderProgram();
+
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view)); //set the values for the uniform containing the view
     projection = glm::perspective(glm::radians(camera.zoom), (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height, 10.0f, 100000.0f);
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection)); //set the projection for the uniform containing the view
@@ -308,6 +329,7 @@ void renderScene() {
    scene.renderTerrain(terrainShader, projection, camera);
     scene.renderLights(myBasicShader);
     scene.renderSceneObjects(myBasicShader);
+    scene.renderFire(fireShader, projection, camera, deltaTime);
     scene.renderWater(waterShader, projection, camera);
     scene.drawSkybox(skyboxShader, camera, projection);
     //skybox rendered last!!
@@ -352,7 +374,7 @@ int main(int argc, const char * argv[]) {
 
 
         processMovement();
-	    renderScene();
+	    renderScene( deltaTime);
 
 
 

@@ -9,6 +9,7 @@
 #include "Camera.hpp"
 #include "Terrain.h"
 #include "Water.h"
+#include "Fire.h"
 using glm::vec3;
 //+x -> shadowed part on mountains when light
 namespace gps {
@@ -32,7 +33,7 @@ namespace gps {
 		void initializeSkybox(Shader shader);
 		void initializeSceneObjects();
 		void initWater(gps::Shader waterShader);
-
+		void initFire(gps::Shader fireShader);
 
 		/// //////////////////////////////////////////////////////rendering
 
@@ -40,6 +41,7 @@ namespace gps {
 		void drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection);
 		void renderTerrain(Shader terrainShader, glm::mat4 projection, gps::Camera camera);
 		void renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera);
+		void renderFire(Shader fireShader, glm::mat4 projection, gps::Camera camera, float deltaTime);
 		void renderSceneObjects(Shader basicShader);
 		///////////////////////////////////////////////////////////////misc
 		//x - width, z - height  ->perpendicular to the longer part of the oasis
@@ -68,6 +70,7 @@ namespace gps {
 		Skybox skybox;
 		Terrain terrain;
 		Water water;
+		Fire fire;
 		////////////////////////////////////////////////helper functions
 		float perlinNoise(float x, float z);
 

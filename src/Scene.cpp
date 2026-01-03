@@ -68,6 +68,11 @@ void gps::Scene::renderWater(Shader waterShader, glm::mat4 projection, gps::Came
 	this->water.renderWater(waterShader, projection, camera);
 }
 
+void gps::Scene::renderFire(Shader fireShader, glm::mat4 projection, gps::Camera camera, float deltaTime)
+{
+	this->fire.renderFire(fireShader, projection, camera,  deltaTime);
+}
+
 void gps::Scene::renderSceneObjects(Shader basicShader)
 {
 	basicShader.useShaderProgram();
@@ -290,6 +295,11 @@ void gps::Scene::initializeSceneObjects()
 void gps::Scene::initWater(gps::Shader waterShader)
 {
 	this->water.initializeWater(waterShader);
+}
+
+void gps::Scene::initFire(gps::Shader fireShader)
+{
+	this->fire.initializeFire(fireShader);
 }
 
 void gps::Scene::renderLights(Shader lightsshader)

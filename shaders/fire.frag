@@ -1,0 +1,77 @@
+#version 410 core
+out vec4 outputColor;
+
+
+in vec2 texCoord;
+in vec2 texCoords1;
+in vec2 texCoords2;
+in vec2 texCoords3;
+
+uniform sampler2D fireTexture;
+uniform sampler2D noiseTexture;
+uniform sampler2D alphaTexture;
+
+uniform vec2 distortion1; //each distortion is used to distort each texture
+uniform vec2 distortion2;
+uniform vec2 distortion3;
+uniform float distortionScale;//disturbs the final texture, shapes it like a flame
+uniform float distortionBias;
+
+
+void main()
+{   
+    vec4 noise1;
+    vec4 noise2;
+    vec4 noise3;
+    vec4 finalNoise;
+    float perturb;
+    vec2 noiseCoords;
+    vec4 fireColor;
+    vec4 alphaColor;
+
+    //sampling the texture, with diff texCoords
+    noise1 = texture(noiseTexture, texCoords1);
+    noise2 = texture(noiseTexture, texCoords2);
+    noise3 = texture(noiseTexture, texCoords3);
+
+    //translate noises from 0,1 to -1,1 space
+     noise1 = (noise1 - 0.5f) * 2.0f;
+    noise2 = (noise2 - 0.5f) * 2.0f;
+    noise3 = (noise3 - 0.5f) * 2.0f;
+
+
+        // Distort the three noise x and y coordinates by the three different distortion x and y values.
+    noise1.xy = noise1.xy * distortion1.xy;
+    noise2.xy = noise2.xy * distortion2.xy;
+    noise3.xy = noise3.xy * distortion3.xy;
+
+    // Combine all three distorted noise results into a single noise result.
+    finalNoise = noise1 + noise2 + noise3;
+
+
+    // The perturbation gets stronger as you move up the texture which creates the flame flickering at the top effect.
+    perturb = ((texCoord.y) * distortionScale) + distortionBias;
+
+    // Now create the perturbed and distorted texture sampling coordinates that will be used to sample the fire color texture.
+    noiseCoords.x = (finalNoise.x * perturb) + texCoord.x;
+    noiseCoords.y = (finalNoise.y * perturb) + (1.0f - texCoord.y);
+    noiseCoords.y = 1.0 - noiseCoords.y;
+
+        // Sample the color from the fire texture using the perturbed and distorted texture sampling coordinates.
+    // Use the clamping sample state instead of the wrap sample state to prevent flames wrapping around.
+    fireColor = texture(fireTexture, noiseCoords);
+
+    // Sample the alpha value from the alpha texture using the perturbed and distorted texture sampling coordinates.
+    // This will be used for transparency of the fire.
+    // Use the clamping sample state instead of the wrap sample state to prevent flames wrapping around.
+    alphaColor = texture(alphaTexture, noiseCoords.xy);
+
+
+    // Set the alpha blending of the fire to the perturbed and distored alpha texture value.
+    fireColor.a = alphaColor.r;
+    if(fireColor.a < 0.01) discard;
+    // Set the final output color to be the completed fire effect.
+    outputColor = fireColor;
+
+   // outputColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+} 

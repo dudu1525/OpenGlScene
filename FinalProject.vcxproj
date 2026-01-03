@@ -22,6 +22,7 @@
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\errorReporting.cpp" />
+    <ClCompile Include="src\Fire.cpp" />
     <ClCompile Include="src\LightSources.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="include\Camera.hpp" />
     <ClInclude Include="include\Entity.h" />
     <ClInclude Include="include\errorReporting.h" />
+    <ClInclude Include="include\Fire.h" />
     <ClInclude Include="include\LightSources.h" />
     <ClInclude Include="include\Mesh.hpp" />
     <ClInclude Include="include\Model3D.hpp" />
@@ -52,6 +54,8 @@
     <ClInclude Include="include\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\fire.frag" />
+    <None Include="shaders\fire.vert" />
     <None Include="shaders\water.frag" />
     <None Include="shaders\water.vert" />
   </ItemGroup>

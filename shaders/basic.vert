@@ -9,10 +9,14 @@ out vec3 fNormalWorld;
 
 out vec2 fTexCoords;
 
+out vec4 fragPosLightSpace; //for shadows
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform mat3 normalMatrix; //transpose (inverse matrix)
+
+uniform mat4 lightSpaceMatrix;//FOR SHADOWS
 
 void main()
 {
@@ -23,5 +27,7 @@ void main()
     fPosWorld = vec3( model * vec4(vPosition, 1.0));
 
     fNormalWorld = normalize(normalMatrix * vNormal);
+
+    fragPosLightSpace = lightSpaceMatrix * vec4(fPosWorld, 1.0);
 
 }

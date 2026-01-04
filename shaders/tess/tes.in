@@ -11,6 +11,10 @@ out vec2 TexCoordFrag;
 out vec3 fNormalWorld;
 out vec3 fPosWorld;
 
+out vec4 fragPosLightSpace; //for shadows
+uniform mat4 lightSpaceMatrix;//FOR SHADOWS
+
+
 void main() {
     float u = gl_TessCoord.x;
     float v = gl_TessCoord.y;
@@ -33,4 +37,6 @@ void main() {
     fNormalWorld = normalize(normalMatrix * normal);//normalized 'world' normals
 
     gl_Position = projection * view * model * p;
+
+   fragPosLightSpace = lightSpaceMatrix * vec4(fPosWorld, 1.0);
 }

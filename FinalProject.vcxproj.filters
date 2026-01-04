@@ -116,5 +116,7 @@
     <None Include="shaders\water.vert" />
     <None Include="shaders\fire.vert" />
     <None Include="shaders\fire.frag" />
+    <None Include="shaders\shadows.vert" />
+    <None Include="shaders\shadows.frag" />
   </ItemGroup>
 </Project>

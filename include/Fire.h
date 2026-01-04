@@ -42,14 +42,15 @@ private:
 	unsigned int fireText;
 	unsigned int alphaText, noiseText;
 	float vertices[20] = {
-	 4450.0f,    800.0f, 6300.0f,    0.0f, 1.0f,  //top left
-	  4150.0f,    800.0f,  6300.0f,   1.0f,1.0f,// top right
-		4150.0f,    300.0f,   6300.0f,   1.0f, 0.0f,// bottom right
-		4450.0f,    300.0f,    6300.0f,   0.0f,0.0f,//bottom left
+	 150.0f,    400.0f, 0.0f,    0.0f, 1.0f,  //top left
+	  -150.0f,    400.0f,  0.0f,   1.0f,1.0f,// top right
+		-150.0f,    -100.0f,   0.0f,   1.0f, 0.0f,// bottom right
+		150.0f,    -100.0f,    0.0f,   0.0f,0.0f,//bottom left
 	};
+	//mid bottom: 4300, 400fx
 	unsigned int indices[6] = {
-		0,2,1, 
-		0,3,2
+		0,1,2, 
+		0,2,3
 
 	};
 
@@ -63,6 +64,14 @@ private:
 
 
 };
+//world coors:
+//	float vertices[20] = {
+//4450.0f, 800.0f, 6300.0f, 0.0f, 1.0f,  //top left
+//4150.0f, 800.0f, 6300.0f, 1.0f, 1.0f,// top right
+//4150.0f, 300.0f, 6300.0f, 1.0f, 0.0f,// bottom right
+//4450.0f, 300.0f, 6300.0f, 0.0f, 0.0f,//bottom left
+	//};
+
 
 
 #endif;

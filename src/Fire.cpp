@@ -95,12 +95,20 @@ void Fire::renderFire(gps::Shader shader, glm::mat4 projection, gps::Camera came
 	glActiveTexture(GL_TEXTURE6); 
 	glBindTexture(GL_TEXTURE_2D, alphaText);
 
+	glm::vec3 campos = camera.getPositionCamera();
+	glm::vec3 firepos = glm::vec3(4300.0f, 400.0f, 6300.0f);
+	float angle = atan2(campos.x - firepos.x, campos.z - firepos.z);
+	glm::mat4 model = glm::mat4(1.0f);
+
+	model = glm::translate(model, firepos); 
+	model = glm::rotate(model, angle, glm::vec3(0.0f, 1.0f, 0.0f));
+
 	shader.useShaderProgram();
 	//send projection, view, model matrices
 	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
 	// world transformation and send uniforms
-	glm::mat4 model = glm::mat4(1.0f);
+
 	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	frameTime += deltaTime;
 	if (frameTime > 1000.0f)

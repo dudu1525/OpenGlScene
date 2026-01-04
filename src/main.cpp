@@ -51,9 +51,12 @@ gps::Shader skyboxShader;
 gps::Shader terrainShader;
 gps::Shader waterShader;
 gps::Shader fireShader;
+gps::Shader shadowShader;
 ///////////////////////////////////////scene related
 gps::Scene scene;
-
+//////////////////////////////////////SHADOWS made with: https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+unsigned int depthMapFBO;
+unsigned int depthMap;
 
 // matrices
 glm::mat4 model;
@@ -215,6 +218,9 @@ void initShaders() {
 
     fireShader.loadShader("shaders/fire.vert", "shaders/fire.frag");
 
+    shadowShader.loadShader("shaders/shadows.vert", "shaders/shadows.frag");
+
+
 }
 void initScene()
 {   //initialize directional light - bright
@@ -297,7 +303,7 @@ void processMovement() {
 
 
 void renderScene(float deltaTime) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     //objects all generally share this view, projection matrixes
     view = camera.getViewMatrix();
     myBasicShader.useShaderProgram();
@@ -327,7 +333,9 @@ void renderScene(float deltaTime) {
 
 
    scene.renderTerrain(terrainShader, projection, camera);
+
     scene.renderLights(myBasicShader);
+
     scene.renderSceneObjects(myBasicShader);
     scene.renderFire(fireShader, projection, camera, deltaTime);
     scene.renderWater(waterShader, projection, camera);
@@ -336,7 +344,34 @@ void renderScene(float deltaTime) {
 
 
 }
+void initializeShadows()
+{
+    const unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
+    glGenFramebuffers(1, &depthMapFBO);
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    myBasicShader.useShaderProgram();
+    glUniform1i(glGetUniformLocation(myBasicShader.shaderProgram, "shadowMap"), 7); //set on 1?
+
+
+    terrainShader.useShaderProgram();
+    glUniform1i(glGetUniformLocation(terrainShader.shaderProgram, "shadowMap"), 7);
+    scene.initSimpleModels(shadowShader);//initialize simple terrain
+}
 void cleanup() {
     myWindow.Delete();
     //delete skybox, moon/sun!!
@@ -362,17 +397,58 @@ int main(int argc, const char * argv[]) {
   
 	glCheckError();
 
-
+    initializeShadows();
 
 	while (!glfwWindowShouldClose(myWindow.getWindow())) 
     {
-    
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+        ////////////////////////////////////////////////light POV
+        glm::vec3 lightDir = glm::normalize(glm::vec3(-10.0f, -7.0f, -3.0f));
+        if (scene.dayTime)
+            lightDir = glm::normalize(glm::vec3(-10.0f, -7.0f, -3.0f));
+        else
+            lightDir = glm::normalize(glm::vec3(5.0f, -2.0f, -1.0f));
+ 
+        glm::vec3 lightPos = -lightDir * 35000.0f; //far away sun
+        glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 lightProjection = glm::ortho(-30000.0f, 30000.0f, -30000.0f, 30000.0f, 0.1f, 80000.0f);
+        glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+        // render scene from light's point of view
+        shadowShader.useShaderProgram();
+        glUniformMatrix4fv(glGetUniformLocation(shadowShader.shaderProgram, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+        glViewport(0, 0, 4096, 4096);
+       glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+       // glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        scene.renderOnlyModels(shadowShader); //RENDER SCENE WITH ONLY OBJECTS AS MODELS!
+        glCullFace(GL_BACK);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
+
+
+
+        ////////////////////////////////////////////normal POV
+        glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+       myBasicShader.useShaderProgram();  //!!!!!!!NEED TO UPDATE VERTEX+FRAGMENT SHADER WITH LIGHTSPACE, LIGHTPOS, SHADOWMAP
+        glUniformMatrix4fv(glGetUniformLocation(myBasicShader.shaderProgram, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+
+        terrainShader.useShaderProgram();
+        glUniformMatrix4fv(glGetUniformLocation(terrainShader.shaderProgram, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+        //activate depthmap which is set to slot 7
+        glActiveTexture(GL_TEXTURE7);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
         processMovement();
 	    renderScene( deltaTime);
 

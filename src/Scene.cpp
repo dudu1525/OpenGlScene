@@ -110,6 +110,37 @@ void gps::Scene::renderSceneObjects(Shader basicShader)
 
 }
 
+void gps::Scene::renderOnlyModels(Shader shadowShader)
+{
+	shadowShader.useShaderProgram();
+	glm::mat4 model = glm::mat4(1.0f);
+	//aplply modifs
+	//glUniformMatrix4fv(glGetUniformLocation(depthShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	//draw
+
+	for (int i = 0; i < palmtree.size(); i++)
+	{
+		glUniformMatrix4fv(glGetUniformLocation(shadowShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(palmtree.at(i).getModelMatrix()));
+		palmtree.at(i).getModel()->Draw(shadowShader);
+	}
+	/////////////////////////////////////////////PIER
+	glUniformMatrix4fv(glGetUniformLocation(shadowShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(pier.getModelMatrix()));
+	pier.getModel()->Draw(shadowShader);
+	////////////////////////////////////////////////tent
+	glUniformMatrix4fv(glGetUniformLocation(shadowShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(tent.getModelMatrix()));
+	tent.getModel()->Draw(shadowShader);
+
+	terrain.renderSimple(shadowShader);
+}
+
+void gps::Scene::initSimpleModels(Shader shadowShader)
+{
+
+	terrain.initSimple();
+
+	//other inits
+}
+
 void gps::Scene::positionTrees()
 { //width = width of the terrain on X axis
 	//height = size of the terrain on Z axis
@@ -251,7 +282,7 @@ void gps::Scene::initTerrain(const char* texturePath, const char* roughTexture,g
 {
 	terrain.initializeTerrain(texturePath, roughTexture, shader, lightSources);
 
-	
+
 }
 
 void gps::Scene::initializeSkybox(gps::Shader shader)

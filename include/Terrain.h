@@ -37,13 +37,20 @@ public:
 	void renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps::Camera camera);
 	void setLightUniforms(gps::Shader terrainShader, gps::LightSources lights);
 
+	void initSimple();
+	void renderSimple(gps::Shader shader);
 	glm::vec3 getNormal(float x, float z);
 private:
 	
 	float perlinNoise(float x, float z);
+	//for shadows
+	unsigned int vaosimple, vbosimple, ebosimple;
+	std::vector<float> verticessimple;
+	std::vector<unsigned int> indicessimple;
 
 
-	//new
+
+
 	unsigned int terrainVAO, terrainVBO, terrainEBO;
 
 

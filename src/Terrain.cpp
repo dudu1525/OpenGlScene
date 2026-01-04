@@ -141,6 +141,69 @@ void Terrain::setLightUniforms(gps::Shader terrainShader, gps::LightSources ligh
 
 }
 
+void Terrain::initSimple()
+{   
+    for (int i = 0; i < REZ; i++) {
+        for (int j = 0; j < REZ; j++) {
+            float x = -WIDTH / 2.0f + (float)i * WIDTH / (REZ - 1);
+            float z = -HEIGHT / 2.0f + (float)j * HEIGHT / (REZ - 1);
+            verticessimple.push_back(x); //x
+            float y = perlinNoise(x, z);
+            verticessimple.push_back(y);
+            verticessimple.push_back(z); //z
+
+        }
+    }
+
+    for (int i = 0; i < REZ - 1; i++) {
+        for (int j = 0; j < REZ - 1; j++) {
+            int topLeft = i * REZ + j;
+            int topRight = (i + 1) * REZ + j;
+            int bottomLeft = i * REZ + (j + 1);
+            int bottomRight = (i + 1) * REZ + (j + 1);
+
+            // Triangle 1
+            indicessimple.push_back(topLeft);
+            indicessimple.push_back(bottomLeft);
+            indicessimple.push_back(topRight);
+
+            // Triangle 2
+            indicessimple.push_back(topRight);
+            indicessimple.push_back(bottomLeft);
+            indicessimple.push_back(bottomRight);
+        }
+    }
+    glGenVertexArrays(1, &vaosimple);
+    glBindVertexArray(vaosimple);
+
+    glGenBuffers(1, &vbosimple);
+    glBindBuffer(GL_ARRAY_BUFFER, vbosimple);
+    glBufferData(GL_ARRAY_BUFFER, verticessimple.size() * sizeof(float), verticessimple.data(), GL_STATIC_DRAW);
+
+
+    glGenBuffers(1, &ebosimple);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebosimple);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicessimple.size() * sizeof(unsigned int), indicessimple.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);//location
+
+}
+
+void Terrain::renderSimple(gps::Shader shader)
+{
+    shader.useShaderProgram();
+    glm::mat4 model = glm::mat4(1.0f);
+    glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+    
+    glBindVertexArray(vaosimple);
+
+    glDrawElements(GL_TRIANGLES, (GLsizei)indicessimple.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
+
+}
+
 float Terrain::perlinNoise(float x, float z)
 {
     float nx = x / (WIDTH / 2.0f);//normalize the x and y to -1 1

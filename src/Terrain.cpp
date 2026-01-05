@@ -162,12 +162,12 @@ void Terrain::initSimple()
             int bottomLeft = i * REZ + (j + 1);
             int bottomRight = (i + 1) * REZ + (j + 1);
 
-            // Triangle 1
+          
             indicessimple.push_back(topLeft);
             indicessimple.push_back(bottomLeft);
             indicessimple.push_back(topRight);
 
-            // Triangle 2
+        
             indicessimple.push_back(topRight);
             indicessimple.push_back(bottomLeft);
             indicessimple.push_back(bottomRight);

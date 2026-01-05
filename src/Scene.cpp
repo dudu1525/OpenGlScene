@@ -101,10 +101,18 @@ void gps::Scene::renderSceneObjects(Shader basicShader)
 	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(campfire.getModelMatrix()));
 	campfire.getModel()->Draw(basicShader);
 	////////////////////////////////////////////
-	glm::mat3 fernnor = glm::mat3(glm::inverseTranspose(ferns.at(0).getModelMatrix()));
-	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(fernnor));
-	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(ferns.at(0).getModelMatrix()));
-	ferns.at(0).getModel()->Draw(basicShader);
+	for (int i=0;i<ferns.size();i++)
+	{
+		glm::mat3 fernnor = glm::mat3(glm::inverseTranspose(ferns.at(i).getModelMatrix()));
+		glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(fernnor));
+		glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(ferns.at(i).getModelMatrix()));
+		ferns.at(i).getModel()->Draw(basicShader);
+	}
+	//glm::mat3 otherentnor = glm::mat3(glm::inverseTranspose(otherent.getModelMatrix()));
+//	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(otherentnor));
+	//glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(otherent.getModelMatrix()));
+	//otherent.getModel()->Draw(basicShader);
+
 
 	glEnable(GL_CULL_FACE);
 
@@ -298,6 +306,15 @@ void gps::Scene::initializeSceneObjects()
 	pierModel.LoadModel("models/outerworld/pier.obj");
 	campfireModel.LoadModel("models/outerworld/campfire.obj");
 	tentModel.LoadModel("models/outerworld/tent/tent.obj");
+
+	ivyModel.LoadModel("models/weeds/222/ivy_default.obj");  //*5
+	tinyweed1Model.LoadModel("models/weeds/333/tinyweed.obj");
+	tinyweed2Model.LoadModel("models/weeds/tinyweed/tinyweed2.obj");
+	beachrockModel.LoadModel("models/weeds/bigrock/beachrock.obj");
+
+	beachgrassModel.LoadModel("models/weeds/beachgrass/beachgrass.obj");
+
+
 	//pier
 	pier= Entity(&pierModel, glm::vec3(1200.0, -280.0f,3900.0f ));
 	pier.rotation = glm::vec3(0, 270, 0);
@@ -315,11 +332,11 @@ void gps::Scene::initializeSceneObjects()
 	campfire.scale = 120;
 
 	///////
-	Entity e(&tropicalfern2, glm::vec3(7000.0, 405.0, 1010.0f));
-	e.scale = 200;
-	e.rotation = glm::vec3(-90, 0, 0);
-	ferns.push_back(e);
-
+	//Entity e(&tropicalfern2, glm::vec3(7000.0, 405.0, 1010.0f));
+	//e.scale = 200;
+	//e.rotation = glm::vec3(-90, 0, 0);
+	//ferns.push_back(e);
+	positionFerns();
 	positionTrees();
 }
 
@@ -331,6 +348,137 @@ void gps::Scene::initWater(gps::Shader waterShader)
 void gps::Scene::initFire(gps::Shader fireShader)
 {
 	this->fire.initializeFire(fireShader);
+}
+
+void gps::Scene::positionFerns()
+{//cu 0.5 mere si 8241.0f; //float bigY = 5712.0f; <<aproape de apa
+	srand(10);
+	//position different entities inside 2 elippses given scale initially is 0.5 and 10200 and 7700
+	//first type of ferns
+	for (int i=0;i<60;i++)
+	{
+		float angle = (static_cast<float>(rand()) / 0x7fff) * 2.0f * glm::pi<float>();
+		//scale^2=0.25
+		float t = 0.5 + (float)(rand()) / ((float)(0x7fff / (1 - 0.5)));
+		float r = sqrt(t);
+
+		float nx = bigX * r * cos(angle);
+		float zx = bigY * r * sin(angle);
+
+		float y = perlinNoise(nx, zx);
+		//printf("nx:%f, nz:%f\n", nx, zx);
+		Entity e(&tropicalfern2, glm::vec3(nx, y, zx));
+		e.rotation = glm::vec3(-90, 0, 0);
+		e.scale = 200;
+		ferns.push_back(e);
+	}
+	//second type of ferns
+	bigX += 5000;
+	bigY += 3000;
+	for (int i = 0; i <60; i++)
+	{
+		float angle = (static_cast<float>(rand()) / 0x7fff) * 2.0f * glm::pi<float>();
+		//scale^2=0.25
+		float t = 0.4 + (float)(rand()) / ((float)(0x7fff / (1 - 0.4)));
+		float r = sqrt(t);
+
+		float nx = bigX * r * cos(angle);
+		float zx = bigY * r * sin(angle);
+
+		float y = perlinNoise(nx, zx);
+		//printf("nx:%f, nz:%f\n", nx, zx);
+		Entity e(&tinyweed1Model, glm::vec3(nx, y, zx));
+	//	e.rotation = glm::vec3(-90, 0, 0);
+		e.scale = 4;
+		ferns.push_back(e);
+	}
+	bigX -= 5000;
+	bigY -= 3000;
+	//third type of ferns
+	for (int i = 0; i < 30; i++)
+	{
+		float angle = (static_cast<float>(rand()) / 0x7fff) * 2.0f * glm::pi<float>();
+		//scale^2=0.25
+		float t = 0.4 + (float)(rand()) / ((float)(0x7fff / (1 - 0.4)));
+		float r = sqrt(t);
+
+		float nx = bigX * r * cos(angle);
+		float zx = bigY * r * sin(angle);
+
+		float y = perlinNoise(nx, zx);
+		//printf("nx:%f, nz:%f\n", nx, zx);
+		Entity e(&tinyweed2Model, glm::vec3(nx, y, zx));
+		//	e.rotation = glm::vec3(-90, 0, 0);
+		e.scale = 2;
+		ferns.push_back(e);
+	}
+
+
+	//beach grass
+	bigX += 15000;
+	bigY += 13000;
+	for (int i = 0; i < 60; i++)
+	{
+		float angle = (static_cast<float>(rand()) / 0x7fff) * 2.0f * glm::pi<float>();
+		//scale^2=0.25
+		float t = 0.2 + (float)(rand()) / ((float)(0x7fff / (1 - 0.2)));
+		float r = sqrt(t);
+
+		float nx = bigX * r * cos(angle);
+		float zx = bigY * r * sin(angle);
+
+		float y = perlinNoise(nx, zx);
+		//printf("nx:%f, nz:%f\n", nx, zx);
+		Entity e(&beachgrassModel, glm::vec3(nx, y, zx));
+			e.rotation = glm::vec3(-90, 0, 0);
+		e.scale = 50;
+		ferns.push_back(e);
+	}
+
+	//beach rock
+	bigX -= 15000;
+	bigY -= 13000;
+	for (int i = 0; i < 20; i++)
+	{
+		float angle = (static_cast<float>(rand()) / 0x7fff) * 2.0f * glm::pi<float>();
+		//scale^2=0.25
+		float t = 0.5 + (float)(rand()) / ((float)(0x7fff / (1 - 0.5)));
+		float r = sqrt(t);
+
+		float nx = bigX * r * cos(angle);
+		float zx = bigY * r * sin(angle);
+
+		float y = perlinNoise(nx, zx);
+		//printf("nx:%f, nz:%f\n", nx, zx);
+		Entity e(&beachrockModel, glm::vec3(nx, y, zx));
+		//e.rotation = glm::vec3(-90, 0, 0);
+		e.scale = 2;
+		ferns.push_back(e);
+	}
+
+
+	//ivy
+	srand(9);
+	for (int i = 0; i < 20; i++)
+	{
+		float angle = (static_cast<float>(rand()) / 0x7fff) * 2.0f * glm::pi<float>();
+		//scale^2=0.25
+		float t = 0.5 + (float)(rand()) / ((float)(0x7fff / (1 - 0.5)));
+		float r = sqrt(t);
+
+		float nx = bigX * r * cos(angle);
+		float zx = bigY * r * sin(angle);
+
+		float y = perlinNoise(nx, zx);
+		//printf("nx:%f, nz:%f\n", nx, zx);
+		Entity e(&ivyModel, glm::vec3(nx, y, zx));
+		e.rotation = glm::vec3(-90, 0, 0);
+		e.scale = 5;
+		ferns.push_back(e);
+	}
+
+
+	//add rotation -90 + rand MOD 270 on y for better visuals
 }
 
 void gps::Scene::renderLights(Shader lightsshader)

@@ -34,6 +34,7 @@ namespace gps {
 		void initializeSceneObjects();
 		void initWater(gps::Shader waterShader);
 		void initFire(gps::Shader fireShader);
+		void positionFerns();
 
 		/// //////////////////////////////////////////////////////rendering
 
@@ -62,12 +63,18 @@ namespace gps {
 		gps::Model3D pierModel;
 		gps::Model3D tentModel;
 		gps::Model3D campfireModel;
+
+		gps::Model3D tinyweed1Model, tinyweed2Model, tinyweed3Model;
+		gps::Model3D beachrockModel, beachgrassModel;
+		gps::Model3D ivyModel;
 		/// entities
 		Entity campfire;
 		Entity sun;
 		Entity moon;
 		Entity pier;
 		Entity tent;
+
+		
 		std::vector<Entity> palmtree;//load more of these and displace them
 		std::vector<Entity> ferns;
 		////////////////////////////other aspects
@@ -77,6 +84,10 @@ namespace gps {
 		Fire fire;
 		////////////////////////////////////////////////helper functions
 		float perlinNoise(float x, float z);
+		///////////////////////////other
+		float scale = 0.5f;
+		float bigX = 10241.0f;
+		float bigY = 7712.0f;
 
 	};
 

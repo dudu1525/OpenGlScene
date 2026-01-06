@@ -34,7 +34,7 @@ public:
 	Terrain() {}
 	//new
 	void initializeTerrain(const char* texturePath,const char* roughPath, gps::Shader terrainShader, gps::LightSources lights);
-	void renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps::Camera camera);
+	void renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps::Camera camera, glm::vec4 plane);
 	void setLightUniforms(gps::Shader terrainShader, gps::LightSources lights);
 
 	void initSimple();

@@ -18,11 +18,17 @@ uniform mat3 normalMatrix; //transpose (inverse matrix)
 
 uniform mat4 lightSpaceMatrix;//FOR SHADOWS
 
+uniform vec4 plane;//for water shader set to 0, 0, 0 1 when not clipping!!!
+
 void main()
 {
     gl_Position = projection * view * model * vec4(vPosition, 1.0);
     fTexCoords = vTexCoords;
-
+    //for water shader
+    vec4 worldpos=model*vec4(vPosition, 1.0);
+    gl_ClipDistance[0] = dot(worldpos,plane);
+    
+    
     //world space
     fPosWorld = vec3( model * vec4(vPosition, 1.0));
 

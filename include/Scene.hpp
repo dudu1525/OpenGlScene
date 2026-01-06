@@ -47,6 +47,8 @@ namespace gps {
 
 		void renderOnlyModels(Shader shadowShader);
 		void initSimpleModels(Shader shadowShader);
+
+		void renderSceneObjectsWithPlane(glm::vec4 clipPlane, Shader terrainShader, Shader basicShader, glm::mat4 projection, gps::Camera camera);
 		///////////////////////////////////////////////////////////////misc
 		//x - width, z - height  ->perpendicular to the longer part of the oasis
 		int outerWidth=13000, outerHeight=12000, innerWidth=5300, innerHeight=3600;//+- 

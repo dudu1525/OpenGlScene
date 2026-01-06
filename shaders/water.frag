@@ -1,7 +1,21 @@
-#version 410 core
-out vec4 FragColor;
+    #version 410 core
+    out vec4 FragColor;
 
-void main()
-{
-    FragColor = vec4(0.0f, 0.0f, 1.0f, 1.0f);
-} 
+    in vec4 clipSpace;
+
+    uniform sampler2D reflectionTexture;
+    uniform sampler2D refractionTexture;
+
+
+    void main()
+    {   
+        vec2 ndc = (clipSpace.xy/clipSpace.w)/2.0 + 0.5 ;
+
+        vec2 reflectTexCoords = vec2(ndc.x, 1-ndc.y);
+        vec2 refractTexCoords = vec2(ndc.x, ndc.y);
+
+        vec4 reflectColour=texture(reflectionTexture, reflectTexCoords);
+        vec4 refractColour=texture(refractionTexture, refractTexCoords);
+
+        FragColor = mix(reflectColour, refractColour, 0.5);
+    } 

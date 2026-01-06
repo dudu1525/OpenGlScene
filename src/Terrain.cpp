@@ -101,10 +101,10 @@ void Terrain::initializeTerrain(const char* texturePath,const char* roughPath, g
     setLightUniforms(terrainShader, lights);
 }
 
-void Terrain::renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps::Camera camera)
+void Terrain::renderTerrain(gps::Shader terrainShader, glm::mat4 projection, gps::Camera camera, glm::vec4 plane)
 {
     terrainShader.useShaderProgram();
-
+    glUniform4fv(glGetUniformLocation(terrainShader.shaderProgram, "plane"), 1, glm::value_ptr(plane));
     ///////////////////////////////////////////////bind and activate texture 'sandTexture'
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, this->sandTexture);

@@ -29,6 +29,7 @@ void gps::Scene::changeNightDayDirLight(Shader shader, Shader terrainShader)
 	shader.useShaderProgram();
 	if (dayTime)
 	{
+		
 		dayTime = false;
 		glm::vec3 direction(5.0f, -2.0f, -1.0f);
 		glm::vec3 ambientD(0.02f, 0.02f, 0.08f);
@@ -60,7 +61,7 @@ void gps::Scene::drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 pr
 
 void gps::Scene::renderTerrain(Shader terrainShader, glm::mat4 projection,gps::Camera camera)
 {
-	terrain.renderTerrain(terrainShader, projection, camera);
+	terrain.renderTerrain(terrainShader, projection, camera, glm::vec4(0,0,0,1));
 }
 
 void gps::Scene::renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera)
@@ -76,7 +77,9 @@ void gps::Scene::renderFire(Shader fireShader, glm::mat4 projection, gps::Camera
 void gps::Scene::renderSceneObjects(Shader basicShader)
 {
 	basicShader.useShaderProgram();
+	glUniform4fv(glGetUniformLocation(basicShader.shaderProgram, "plane"), 1, glm::value_ptr(glm::vec4(0, 0, 0, 1)));
 	///////////////////////////////////////////PALM TREES
+	
 	glDisable(GL_CULL_FACE);
 	for (int i = 0; i < palmtree.size(); i++)
 	{
@@ -147,6 +150,50 @@ void gps::Scene::initSimpleModels(Shader shadowShader)
 	terrain.initSimple();
 
 	//other inits
+}
+
+void gps::Scene::renderSceneObjectsWithPlane(glm::vec4 clipPlane, Shader terrainShader, Shader basicShader, glm::mat4 projection, gps::Camera camera)
+{
+	terrain.renderTerrain(terrainShader, projection, camera, clipPlane);
+	basicShader.useShaderProgram();
+	glUniform4fv(glGetUniformLocation(basicShader.shaderProgram, "plane"), 1, glm::value_ptr(clipPlane));
+	///////////////////////////////////////////PALM TREES
+
+	glDisable(GL_CULL_FACE);
+	for (int i = 0; i < palmtree.size(); i++)
+	{
+		glm::mat3 palmnormal = glm::mat3(glm::inverseTranspose(palmtree.at(i).getModelMatrix()));
+		glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(palmnormal));
+		glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(palmtree.at(i).getModelMatrix()));
+		palmtree.at(i).getModel()->Draw(basicShader);
+	}
+	/////////////////////////////////////////////PIER
+	glm::mat3 pierNormal = glm::mat3(glm::inverseTranspose(pier.getModelMatrix()));
+	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(pierNormal));
+	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(pier.getModelMatrix()));
+	pier.getModel()->Draw(basicShader);
+	////////////////////////////////////////////////tent
+	glm::mat3 tentNormal = glm::mat3(glm::inverseTranspose(tent.getModelMatrix()));
+	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(tentNormal));
+	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(tent.getModelMatrix()));
+	tent.getModel()->Draw(basicShader);
+	///////////////////////////////////////////campfire
+	glm::mat3 campfireNormal = glm::mat3(glm::inverseTranspose(campfire.getModelMatrix()));
+	glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(campfireNormal));
+	glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(campfire.getModelMatrix()));
+	campfire.getModel()->Draw(basicShader);
+	////////////////////////////////////////////
+	for (int i = 0; i < ferns.size(); i++)
+	{
+		glm::mat3 fernnor = glm::mat3(glm::inverseTranspose(ferns.at(i).getModelMatrix()));
+		glUniformMatrix3fv(glGetUniformLocation(basicShader.shaderProgram, "normalMatrix"), 1, GL_FALSE, glm::value_ptr(fernnor));
+		glUniformMatrix4fv(glGetUniformLocation(basicShader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(ferns.at(i).getModelMatrix()));
+		ferns.at(i).getModel()->Draw(basicShader);
+	}
+
+	glEnable(GL_CULL_FACE);
+
+
 }
 
 void gps::Scene::positionTrees()
@@ -290,7 +337,7 @@ void gps::Scene::initTerrain(const char* texturePath, const char* roughTexture,g
 {
 	terrain.initializeTerrain(texturePath, roughTexture, shader, lightSources);
 
-
+	//must     glUniform4fv(glGetUniformLocation(terrainShader.shaderProgram, "plane"), 1, glm::value_ptr(glm::vec4(0, -1, 0, 411)));
 }
 
 void gps::Scene::initializeSkybox(gps::Shader shader)
@@ -313,7 +360,7 @@ void gps::Scene::initializeSceneObjects()
 	beachrockModel.LoadModel("models/weeds/bigrock/beachrock.obj");
 
 	beachgrassModel.LoadModel("models/weeds/beachgrass/beachgrass.obj");
-
+	//must :     glUniform4fv(glGetUniformLocation(terrainShader.shaderProgram, "plane"), 1, glm::value_ptr(glm::vec4(0, -1, 0, 411)));
 
 	//pier
 	pier= Entity(&pierModel, glm::vec3(1200.0, -280.0f,3900.0f ));
@@ -368,7 +415,8 @@ void gps::Scene::positionFerns()
 		float y = perlinNoise(nx, zx);
 		//printf("nx:%f, nz:%f\n", nx, zx);
 		Entity e(&tropicalfern2, glm::vec3(nx, y, zx));
-		e.rotation = glm::vec3(-90, 0, 0);
+		int randRotation = -90 + rand() % 271;//induce random rotation on y axis
+		e.rotation = glm::vec3(-90, 0, randRotation);
 		e.scale = 200;
 		ferns.push_back(e);
 	}
@@ -388,7 +436,8 @@ void gps::Scene::positionFerns()
 		float y = perlinNoise(nx, zx);
 		//printf("nx:%f, nz:%f\n", nx, zx);
 		Entity e(&tinyweed1Model, glm::vec3(nx, y, zx));
-	//	e.rotation = glm::vec3(-90, 0, 0);
+		int randRotation = -90 + rand() % 271;//induce random rotation on y axis
+		e.rotation = glm::vec3(0, randRotation, 0);
 		e.scale = 4;
 		ferns.push_back(e);
 	}
@@ -408,7 +457,8 @@ void gps::Scene::positionFerns()
 		float y = perlinNoise(nx, zx);
 		//printf("nx:%f, nz:%f\n", nx, zx);
 		Entity e(&tinyweed2Model, glm::vec3(nx, y, zx));
-		//	e.rotation = glm::vec3(-90, 0, 0);
+		int randRotation = -90 + rand() % 271;//induce random rotation on y axis
+		e.rotation = glm::vec3( 0, randRotation, 0);
 		e.scale = 2;
 		ferns.push_back(e);
 	}
@@ -430,7 +480,9 @@ void gps::Scene::positionFerns()
 		float y = perlinNoise(nx, zx);
 		//printf("nx:%f, nz:%f\n", nx, zx);
 		Entity e(&beachgrassModel, glm::vec3(nx, y, zx));
-			e.rotation = glm::vec3(-90, 0, 0);
+		int randRotation = -90 + rand() % 271;//induce random rotation on y axis
+
+			e.rotation = glm::vec3(-90, 0, randRotation);
 		e.scale = 50;
 		ferns.push_back(e);
 	}
@@ -451,7 +503,8 @@ void gps::Scene::positionFerns()
 		float y = perlinNoise(nx, zx);
 		//printf("nx:%f, nz:%f\n", nx, zx);
 		Entity e(&beachrockModel, glm::vec3(nx, y, zx));
-		//e.rotation = glm::vec3(-90, 0, 0);
+		int randRotation = -90 + rand() % 271;//induce random rotation on y axis
+		e.rotation = glm::vec3(0, randRotation, 0);
 		e.scale = 2;
 		ferns.push_back(e);
 	}
@@ -470,9 +523,11 @@ void gps::Scene::positionFerns()
 		float zx = bigY * r * sin(angle);
 
 		float y = perlinNoise(nx, zx);
+
+		int randRotation = -90 + rand() % 271;//induce random rotation on y axis
 		//printf("nx:%f, nz:%f\n", nx, zx);
 		Entity e(&ivyModel, glm::vec3(nx, y, zx));
-		e.rotation = glm::vec3(-90, 0, 0);
+		e.rotation = glm::vec3(-90, 0, randRotation);
 		e.scale = 5;
 		ferns.push_back(e);
 	}

@@ -14,6 +14,7 @@ out vec3 fPosWorld;
 out vec4 fragPosLightSpace; //for shadows
 uniform mat4 lightSpaceMatrix;//FOR SHADOWS
 
+uniform vec4 plane;//for water shader
 
 void main() {
     float u = gl_TessCoord.x;
@@ -39,4 +40,8 @@ void main() {
     gl_Position = projection * view * model * p;
 
    fragPosLightSpace = lightSpaceMatrix * vec4(fPosWorld, 1.0);
+
+       //for water shader
+    vec4 worldpos=model*p;
+    gl_ClipDistance[0] = dot(worldpos,plane);
 }

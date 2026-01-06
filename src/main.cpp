@@ -17,6 +17,7 @@
 #include "Shader.hpp"
 #include "Camera.hpp"
 #include "Model3D.hpp"
+#include "Water.h"
 #include <random>
 #include <iostream>
 #include "Scene.hpp"
@@ -197,6 +198,7 @@ void initOpenGLState() {
     glEnable(GL_CULL_FACE); // cull face
     glCullFace(GL_BACK); // cull back face
     glFrontFace(GL_CCW); // GL_CCW for counter clock-wise
+    glEnable(GL_CLIP_DISTANCE0);
     glfwSetInputMode(myWindow.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);//hide mouse
 }
 //////////////////////////////////////////////////////////////////////////////////////init shaders, uniforms, models
@@ -302,7 +304,7 @@ void processMovement() {
 
 
 
-void renderScene(float deltaTime) {
+void renderScene(float deltaTime, WaterFrameBuffers& buffers) {
 
     //objects all generally share this view, projection matrixes
     view = camera.getViewMatrix();
@@ -338,7 +340,17 @@ void renderScene(float deltaTime) {
 
     scene.renderSceneObjects(myBasicShader);
     scene.renderFire(fireShader, projection, camera, deltaTime);
+
+
+    waterShader.useShaderProgram();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, buffers.getReflectionTexture());
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, buffers.getRefractionTexture());
     scene.renderWater(waterShader, projection, camera);
+
+
     scene.drawSkybox(skyboxShader, camera, projection);
     //skybox rendered last!!
 
@@ -399,6 +411,10 @@ int main(int argc, const char * argv[]) {
 
     initializeShadows();
 
+    WaterFrameBuffers buffers;//init buffers
+    int waterHeight = -3.0f;//for water reflect+refract
+
+
 	while (!glfwWindowShouldClose(myWindow.getWindow())) 
     {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -432,9 +448,33 @@ int main(int argc, const char * argv[]) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
+        //first reflection pass
+        buffers.bindReflectionFrameBuffer();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        float distance = 2 * (camera.getPositionCamera().y - waterHeight);
+        camera.setPosition(camera.getPositionCamera() - glm::vec3(0, distance, 0));
+        camera.invertPitch(); 
+        view = camera.getViewMatrix();//!UPDATE CAMERA AND SEND IT
+        glm::vec4 reflectionPlane = glm::vec4(0, 1, 0, -waterHeight); 
+        myBasicShader.useShaderProgram();
+        glUniform3fv(glGetUniformLocation(myBasicShader.shaderProgram, "viewPos"), 1, glm::value_ptr(camera.getPositionCamera()));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        scene.renderSceneObjectsWithPlane(reflectionPlane, terrainShader, myBasicShader, projection, camera);
+
+        //reset
+        camera.setPosition(camera.getPositionCamera() + glm::vec3(0, distance, 0));
+        camera.invertPitch();
+      
+
+        //refraction pass
+        buffers.bindRefractionFrameBuffer();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glm::vec4 refractionPlane = glm::vec4(0, -1, 0, waterHeight);
+        scene.renderSceneObjectsWithPlane( refractionPlane, terrainShader, myBasicShader, projection, camera);
 
 
-
+        //glDisable(gl_clip_distance0?)
+        buffers.unbindCurrentFrameBuffer();
         ////////////////////////////////////////////normal POV
         glViewport(0, 0, myWindow.getWindowDimensions().width, myWindow.getWindowDimensions().height);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -450,7 +490,7 @@ int main(int argc, const char * argv[]) {
         glActiveTexture(GL_TEXTURE7);
         glBindTexture(GL_TEXTURE_2D, depthMap);
         processMovement();
-	    renderScene( deltaTime);
+	    renderScene( deltaTime, buffers);
 
 
 

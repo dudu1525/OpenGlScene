@@ -24,6 +24,28 @@ namespace gps {
 
         void ProcessMouseScroll(float yoffset);
 
+        void invertPitch() {
+            this->pitch = -pitch;
+            updateCameraVectors();
+        }
+
+        void setPosition(glm::vec3 newPos) {
+            this->cameraPosition = newPos;
+        }
+
+        void updateCameraVectors() {
+            glm::vec3 front;
+            front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+            front.y = sin(glm::radians(pitch));
+            front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+            this->cameraFrontDirection = glm::normalize(front);
+
+            this->cameraRightDirection = glm::normalize(glm::cross(this->cameraFrontDirection, glm::vec3(0,1,0)));
+            this->cameraUpDirection = glm::normalize(glm::cross(this->cameraRightDirection, this->cameraFrontDirection));
+
+        }
+
+
         glm::vec3 getPositionCamera() { return this->cameraPosition; }
     private:
         glm::vec3 cameraPosition;

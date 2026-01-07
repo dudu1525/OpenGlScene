@@ -1,5 +1,5 @@
 #include "Water.h"
-
+#include "LightSources.h"
 void Water::initializeWater(gps::Shader& shader)
 {
     unsigned int indices[] = {
@@ -29,11 +29,25 @@ void Water::initializeWater(gps::Shader& shader)
     moveFactorLoc = glGetUniformLocation(shader.shaderProgram, "moveFactor");
     dudvMap = glGetUniformLocation(shader.shaderProgram, "dudvMap");
     cameraposLoc = glGetUniformLocation(shader.shaderProgram, "cameraPosition");
-   
+    normalMap = glGetUniformLocation(shader.shaderProgram, "normalMap");
+    lightColour = glGetUniformLocation(shader.shaderProgram, "lightColour");
+    lightPos = glGetUniformLocation(shader.shaderProgram, "lightPosition");
     glGenTextures(1, &dudvMapTextureId);
     int width, height, nrComponents;
     unsigned char* data = stbi_load("models/water/waterDUDV.png", &width, &height, &nrComponents, 0);
         glBindTexture(GL_TEXTURE_2D, dudvMapTextureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        stbi_image_free(data);
+
+
+        glGenTextures(1, &normalMapTextureId);
+         data = stbi_load("models/water/normal.png", &width, &height, &nrComponents, 0);
+        glBindTexture(GL_TEXTURE_2D, normalMapTextureId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -48,13 +62,16 @@ void Water::initializeWater(gps::Shader& shader)
 	shader.useShaderProgram();
     glUniform1i(glGetUniformLocation(shader.shaderProgram, "reflectionTexture"), 0);
     glUniform1i(glGetUniformLocation(shader.shaderProgram, "refractionTexture"), 1);
+    //send light colour and light position
     glUniform1i(dudvMap, 2);
+    glUniform1i(normalMap, 3);
 }
 
-void Water::renderWater(gps::Shader& shader, glm::mat4 projection, gps::Camera camera, float deltaTime)
+void Water::renderWater(gps::Shader& shader, glm::mat4 projection, gps::Camera camera, float deltaTime, gps::LightSources& lightSources, WaterFrameBuffers& buffers)
 {
 	shader.useShaderProgram();
-
+  //  glEnable(GL_BLEND);
+   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     moveFactor += WAVE_SPEED * deltaTime;
     if (moveFactor > 1.0f) moveFactor-=1.0f;
     glUniform1f(moveFactorLoc, moveFactor);
@@ -62,11 +79,22 @@ void Water::renderWater(gps::Shader& shader, glm::mat4 projection, gps::Camera c
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, dudvMapTextureId);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, normalMapTextureId);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, buffers.getRefractionDepthTexture());
+    glUniform1i(glGetUniformLocation(shader.shaderProgram, "depthMap"), 4);
 
 
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
     glUniform3fv(cameraposLoc, 1, glm::value_ptr(camera.getPositionCamera()));
+
+
+ glUniform3fv(lightPos, 1, glm::value_ptr(lightSources.dirrlight.direction));   
+ glUniform3fv(lightColour, 1, glm::value_ptr(lightSources.dirrlight.diffuse));   
+
+
 	// world transformation and send uniforms
 	glm::mat4 model = glm::mat4(1.0f);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
@@ -75,7 +103,7 @@ void Water::renderWater(gps::Shader& shader, glm::mat4 projection, gps::Camera c
 	//render
 	glBindVertexArray(waterVAO);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
+  // glDisable(GL_BLEND);
 }
 
 

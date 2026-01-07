@@ -16,12 +16,14 @@
 
 #include "Shader.hpp"
 #include "Camera.hpp"
+#include "LightSources.h"
+class WaterFrameBuffers;
 //effects constructed with the help of the videos: https://www.youtube.com/watch?v=HusvGeEDU_U&list=PLRIWtICgwaX23jiqVByUs0bqhnalNTNZh&index=4
 class Water {
 public:
 
 	void initializeWater(gps::Shader& shader);
-	void renderWater(gps::Shader& shader, glm::mat4 projection, gps::Camera camera, float deltaTime);
+	void renderWater(gps::Shader& shader, glm::mat4 projection, gps::Camera camera, float deltaTime, gps::LightSources& lightSources, WaterFrameBuffers& buffers);
 
 
 private:
@@ -35,8 +37,9 @@ private:
     //CLIPPing plane must be at height -3.0, normal 0,1,0 or 0,-1,0, d = -3.0
 	
     GLuint dudvMap, viewLoc, modelLoc, projLoc, moveFactorLoc;
-    GLuint dudvMapTextureId;
+    GLuint dudvMapTextureId, normalMapTextureId, normalMap;
     GLint cameraposLoc;
+    GLint lightPos, lightColour;
 
     float moveFactor = 0.0f;
     const float WAVE_SPEED = 0.03f;
@@ -46,10 +49,10 @@ private:
 class WaterFrameBuffers {
 public:
     // Resolution constants (Adjust as needed)
-    static const int REFLECTION_WIDTH = 1024;
-    static const int REFLECTION_HEIGHT = 768;
-    static const int REFRACTION_WIDTH = 1024;
-    static const int REFRACTION_HEIGHT = 768;
+  const int REFLECTION_WIDTH = 1024;
+  const int REFLECTION_HEIGHT = 768;
+  const int REFRACTION_WIDTH = 1024;
+   const int REFRACTION_HEIGHT = 768;
 
     WaterFrameBuffers();
     ~WaterFrameBuffers();

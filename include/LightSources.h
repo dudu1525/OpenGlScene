@@ -18,22 +18,26 @@ using  glm::vec3;
 //taken basically from learnopengl https://learnopengl.com/Lighting/Multiple-lights
 namespace gps {
 
+
 	class LightSources {
+    private:
+        struct DirLight {
+            vec3 direction = vec3();
+            vec3 ambient = vec3();
+            vec3 diffuse = vec3();
+            vec3 specular = vec3();
+        };
+
     public:
 
         LightSources();
         void setDirecLightParameters(vec3 direction, vec3 ambientD, vec3 diffuseD, vec3 specularD);
         void setPointLightParameters(vec3 position, vec3 ambientD, vec3 diffuseD, vec3 specularD, float linear, float quadratic);
         void setLightUniforms(GLuint programId);
-
-            
+     
+        DirLight dirrlight;
     private:
-        struct DirLight {
-            vec3 direction=vec3();
-            vec3 ambient = vec3();
-            vec3 diffuse = vec3();
-            vec3 specular = vec3();
-        };
+
 
         struct PointLight {
             vec3 position = vec3();
@@ -47,7 +51,7 @@ namespace gps {
             
         };
 
-        DirLight dirrlight;
+
         PointLight pointlight;
         void setDirectionalUniforms(GLuint programId);
         void setPointUniforms(GLuint programId);

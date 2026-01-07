@@ -41,7 +41,7 @@ namespace gps {
 		void renderLights(Shader lightsshader);
 		void drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection);
 		void renderTerrain(Shader terrainShader, glm::mat4 projection, gps::Camera camera);
-		void renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera, float deltaTime);
+		void renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera, float deltaTime, WaterFrameBuffers& buffers);
 		void renderFire(Shader fireShader, glm::mat4 projection, gps::Camera camera, float deltaTime);
 		void renderSceneObjects(Shader basicShader);
 

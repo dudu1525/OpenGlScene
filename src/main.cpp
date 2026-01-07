@@ -249,7 +249,7 @@ void initUniforms() {
     viewLoc = glGetUniformLocation(myBasicShader.shaderProgram, "view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-    projection = glm::perspective(glm::radians(45.0f),(float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,10.0f, 150000.0f);
+    projection = glm::perspective(glm::radians(45.0f),(float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height,10.0f, 100000.0f);
     projectionLoc = glGetUniformLocation(myBasicShader.shaderProgram, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -347,7 +347,7 @@ void renderScene(float deltaTime, WaterFrameBuffers& buffers) {
     glBindTexture(GL_TEXTURE_2D, buffers.getReflectionTexture());
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, buffers.getRefractionTexture());
-    scene.renderWater(waterShader, projection, camera, deltaTime);
+    scene.renderWater(waterShader, projection, camera, deltaTime, buffers);
 
 
     scene.drawSkybox(skyboxShader, camera, projection);
@@ -454,7 +454,7 @@ int main(int argc, const char * argv[]) {
         camera.setPosition(camera.getPositionCamera() - glm::vec3(0, distance, 0));
         camera.invertPitch(); 
         view = camera.getViewMatrix();//!UPDATE CAMERA AND SEND IT
-        glm::vec4 reflectionPlane = glm::vec4(0, 1, 0, -waterHeight); 
+        glm::vec4 reflectionPlane = glm::vec4(0, 1, 0, -waterHeight+0.5f); 
         myBasicShader.useShaderProgram();
         glUniform3fv(glGetUniformLocation(myBasicShader.shaderProgram, "viewPos"), 1, glm::value_ptr(camera.getPositionCamera()));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -468,7 +468,7 @@ int main(int argc, const char * argv[]) {
         //refraction pass
         buffers.bindRefractionFrameBuffer();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glm::vec4 refractionPlane = glm::vec4(0, -1, 0, waterHeight);
+        glm::vec4 refractionPlane = glm::vec4(0, -1, 0, waterHeight+0.5f);
         scene.renderSceneObjectsWithPlane( refractionPlane,skyboxShader, terrainShader, myBasicShader, projection, camera);
 
 

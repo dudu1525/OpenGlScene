@@ -1,0 +1,38 @@
+# Blender 5.0.1 MTL File: 'None'
+# www.blender.org
+
+newmtl 01
+Ns 319.999939
+Ka 1.000000 1.000000 1.000000
+Kd 0.603827 0.603827 0.603827
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd 01_BaseColor.png
+map_Pr 01_Roughness.png
+
+newmtl 02
+Ns 319.999939
+Ka 1.000000 1.000000 1.000000
+Kd 0.603827 0.603827 0.603827
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd 02_BaseColor.png
+map_Pr 02_Roughness.png
+
+newmtl 03
+Ns 319.999939
+Ka 1.000000 1.000000 1.000000
+Kd 0.603827 0.603827 0.603827
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd 03_BaseColor.png
+map_Pr 03_Roughness.png

@@ -65,9 +65,9 @@ void gps::Scene::renderTerrain(Shader terrainShader, glm::mat4 projection,gps::C
 	terrain.renderTerrain(terrainShader, projection, camera, glm::vec4(0,0,0,1));
 }
 
-void gps::Scene::renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera,float deltaTime)
+void gps::Scene::renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera,float deltaTime, WaterFrameBuffers& buffers)
 {
-	this->water.renderWater(waterShader, projection, camera, deltaTime);
+	this->water.renderWater(waterShader, projection, camera, deltaTime, this->lightSources, buffers);
 }
 
 void gps::Scene::renderFire(Shader fireShader, glm::mat4 projection, gps::Camera camera, float deltaTime)

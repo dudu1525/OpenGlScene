@@ -1,0 +1,13 @@
+# Blender MTL File: '0ceanaAnima.blend'
+# Material Count: 1
+
+newmtl piermtl
+Ns 618.367761
+Ka 0.586364 0.586364 0.586364
+Kd 1.5 1.5 1.5
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd pierTexture.jpg

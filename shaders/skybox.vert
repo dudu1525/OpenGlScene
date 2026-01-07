@@ -5,9 +5,11 @@ out vec3 TexCoords;
 
 uniform mat4 projection;
 uniform mat4 view;
-
+uniform vec4 plane;
 void main()
-{
+{    vec4 worldpos=vec4(aPos, 1.0);
+    gl_ClipDistance[0] = dot(worldpos,plane);
+
     TexCoords = aPos;
     vec4 pos = projection * view * vec4(aPos, 1.0);
     gl_Position = pos.xyww;

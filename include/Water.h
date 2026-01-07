@@ -20,20 +20,26 @@
 class Water {
 public:
 
-	void initializeWater(gps::Shader shader);
-	void renderWater(gps::Shader shader, glm::mat4 projection, gps::Camera camera);
+	void initializeWater(gps::Shader& shader);
+	void renderWater(gps::Shader& shader, glm::mat4 projection, gps::Camera camera, float deltaTime);
 
 
 private:
 	unsigned int waterVAO, waterVBO, waterEBO;
-	float vertices[18] = {
-	 2200.0f,    -3.0f, -15000.0f, // Index 0 (Bottom)
-	  460.0f,    -3.0f,  15000.0f, // Index 1 (Top)
-	15000.0f,    -3.0f,   -400.0f, // Index 2 (Right)
-   -15000.0f,    -3.0f,    900.0f
-	};//was 660, when height was 7450
+    float vertices[12] = {
+     -7344.0f, -3.0f, -4080.0f, 
+     -7344.0f, -3.0f,  4080.0f, 
+      7344.0f, -3.0f,  4080.0f, 
+      7344.0f, -3.0f, -4080.0f  
+    };//was 660, when height was 7450
     //CLIPPing plane must be at height -3.0, normal 0,1,0 or 0,-1,0, d = -3.0
 	
+    GLuint dudvMap, viewLoc, modelLoc, projLoc, moveFactorLoc;
+    GLuint dudvMapTextureId;
+    GLint cameraposLoc;
+
+    float moveFactor = 0.0f;
+    const float WAVE_SPEED = 0.03f;
 
 };
 

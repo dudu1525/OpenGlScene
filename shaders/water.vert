@@ -3,10 +3,15 @@ layout (location = 0) in vec3 aPos;
 
 
 out vec4 clipSpace;
+out vec2 textureCoords;//dudv map
+
+out vec3 toCameraVector; //for fresnel
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+
+uniform vec3 cameraPosition;//fresnel effect
 
 void main()
 {	
@@ -15,5 +20,6 @@ void main()
 	gl_Position = projection * view * worldpos;
 
 	clipSpace= projection * view * worldpos;
-
+	textureCoords = vec2(aPos.x, aPos.z) / 4400.0;
+	toCameraVector = cameraPosition - worldpos.xyz; //for fresnel
 }

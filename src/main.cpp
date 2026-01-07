@@ -68,7 +68,7 @@ glm::mat4 projection;
 GLint modelLoc;
 GLint viewLoc;
 GLint projectionLoc;
-
+GLint lightspaceMatrixLoc, pointlightLinearLoc, shadowMapLoc;
 
 
 
@@ -254,7 +254,6 @@ void initUniforms() {
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 
-
     scene.lightSources.setLightUniforms(myBasicShader.shaderProgram);
 }
 
@@ -331,7 +330,7 @@ void renderScene(float deltaTime, WaterFrameBuffers& buffers) {
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection)); //set the projection for the uniform containing the view
     glUniform3fv(glGetUniformLocation(myBasicShader.shaderProgram, "viewPos"), 1, glm::value_ptr(camera.getPositionCamera()));
 
-    printf("camera position:x:%f y:%f z:%f\n", camera.getPositionCamera().x, camera.getPositionCamera().y, camera.getPositionCamera().z);
+   // printf("camera position:x:%f y:%f z:%f\n", camera.getPositionCamera().x, camera.getPositionCamera().y, camera.getPositionCamera().z);
 
 
    scene.renderTerrain(terrainShader, projection, camera);
@@ -348,7 +347,7 @@ void renderScene(float deltaTime, WaterFrameBuffers& buffers) {
     glBindTexture(GL_TEXTURE_2D, buffers.getReflectionTexture());
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, buffers.getRefractionTexture());
-    scene.renderWater(waterShader, projection, camera);
+    scene.renderWater(waterShader, projection, camera, deltaTime);
 
 
     scene.drawSkybox(skyboxShader, camera, projection);
@@ -459,7 +458,7 @@ int main(int argc, const char * argv[]) {
         myBasicShader.useShaderProgram();
         glUniform3fv(glGetUniformLocation(myBasicShader.shaderProgram, "viewPos"), 1, glm::value_ptr(camera.getPositionCamera()));
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        scene.renderSceneObjectsWithPlane(reflectionPlane, terrainShader, myBasicShader, projection, camera);
+        scene.renderSceneObjectsWithPlane(reflectionPlane,skyboxShader, terrainShader, myBasicShader, projection, camera);
 
         //reset
         camera.setPosition(camera.getPositionCamera() + glm::vec3(0, distance, 0));
@@ -470,7 +469,7 @@ int main(int argc, const char * argv[]) {
         buffers.bindRefractionFrameBuffer();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glm::vec4 refractionPlane = glm::vec4(0, -1, 0, waterHeight);
-        scene.renderSceneObjectsWithPlane( refractionPlane, terrainShader, myBasicShader, projection, camera);
+        scene.renderSceneObjectsWithPlane( refractionPlane,skyboxShader, terrainShader, myBasicShader, projection, camera);
 
 
         //glDisable(gl_clip_distance0?)

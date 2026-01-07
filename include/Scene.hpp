@@ -41,14 +41,14 @@ namespace gps {
 		void renderLights(Shader lightsshader);
 		void drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection);
 		void renderTerrain(Shader terrainShader, glm::mat4 projection, gps::Camera camera);
-		void renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera);
+		void renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera, float deltaTime);
 		void renderFire(Shader fireShader, glm::mat4 projection, gps::Camera camera, float deltaTime);
 		void renderSceneObjects(Shader basicShader);
 
 		void renderOnlyModels(Shader shadowShader);
 		void initSimpleModels(Shader shadowShader);
 
-		void renderSceneObjectsWithPlane(glm::vec4 clipPlane, Shader terrainShader, Shader basicShader, glm::mat4 projection, gps::Camera camera);
+		void renderSceneObjectsWithPlane(glm::vec4 clipPlane,Shader skyboxshader, Shader terrainShader, Shader basicShader, glm::mat4 projection, gps::Camera camera);
 		///////////////////////////////////////////////////////////////misc
 		//x - width, z - height  ->perpendicular to the longer part of the oasis
 		int outerWidth=13000, outerHeight=12000, innerWidth=5300, innerHeight=3600;//+- 

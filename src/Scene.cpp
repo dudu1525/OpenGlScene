@@ -53,7 +53,8 @@ void gps::Scene::changeNightDayDirLight(Shader shader, Shader terrainShader)
 
 void gps::Scene::drawSkybox(gps::Shader shader, gps::Camera camera, glm::mat4 projection)
 {
-
+	shader.useShaderProgram();
+	glUniform4fv(glGetUniformLocation(shader.shaderProgram, "plane"), 1, glm::value_ptr(glm::vec4(0, 0, 0, 1)));
 	skybox.drawSkybox(shader, camera, projection);
 
 
@@ -64,9 +65,9 @@ void gps::Scene::renderTerrain(Shader terrainShader, glm::mat4 projection,gps::C
 	terrain.renderTerrain(terrainShader, projection, camera, glm::vec4(0,0,0,1));
 }
 
-void gps::Scene::renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera)
+void gps::Scene::renderWater(Shader waterShader, glm::mat4 projection, gps::Camera camera,float deltaTime)
 {
-	this->water.renderWater(waterShader, projection, camera);
+	this->water.renderWater(waterShader, projection, camera, deltaTime);
 }
 
 void gps::Scene::renderFire(Shader fireShader, glm::mat4 projection, gps::Camera camera, float deltaTime)
@@ -152,7 +153,7 @@ void gps::Scene::initSimpleModels(Shader shadowShader)
 	//other inits
 }
 
-void gps::Scene::renderSceneObjectsWithPlane(glm::vec4 clipPlane, Shader terrainShader, Shader basicShader, glm::mat4 projection, gps::Camera camera)
+void gps::Scene::renderSceneObjectsWithPlane(glm::vec4 clipPlane, Shader skyboxshader, Shader terrainShader, Shader basicShader, glm::mat4 projection, gps::Camera camera)
 {
 	terrain.renderTerrain(terrainShader, projection, camera, clipPlane);
 	basicShader.useShaderProgram();
@@ -191,9 +192,11 @@ void gps::Scene::renderSceneObjectsWithPlane(glm::vec4 clipPlane, Shader terrain
 		ferns.at(i).getModel()->Draw(basicShader);
 	}
 
+	/////////////////////////////////////////
+
 	glEnable(GL_CULL_FACE);
-
-
+	skybox.drawSkybox(skyboxshader, camera, projection);
+	glUniform4fv(glGetUniformLocation(skyboxshader.shaderProgram, "plane"), 1, glm::value_ptr(clipPlane));
 }
 
 void gps::Scene::positionTrees()

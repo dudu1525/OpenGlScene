@@ -1,9 +1,11 @@
 #include "Water.h"
 
-void Water::initializeWater(gps::Shader shader)
+void Water::initializeWater(gps::Shader& shader)
 {
-	unsigned int indices[] = { 0, 1, 2,
-	0, 3, 1 };
+    unsigned int indices[] = {
+    0, 1, 2,
+    2, 3, 0
+    };
 
 	glGenVertexArrays(1, &waterVAO);
 	glGenBuffers(1, &waterEBO);
@@ -18,23 +20,56 @@ void Water::initializeWater(gps::Shader shader)
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+    //create dudvmap texture
+
+
+    modelLoc = glGetUniformLocation(shader.shaderProgram, "model");
+    viewLoc = glGetUniformLocation(shader.shaderProgram, "view");
+    projLoc = glGetUniformLocation(shader.shaderProgram, "projection");
+    moveFactorLoc = glGetUniformLocation(shader.shaderProgram, "moveFactor");
+    dudvMap = glGetUniformLocation(shader.shaderProgram, "dudvMap");
+    cameraposLoc = glGetUniformLocation(shader.shaderProgram, "cameraPosition");
+   
+    glGenTextures(1, &dudvMapTextureId);
+    int width, height, nrComponents;
+    unsigned char* data = stbi_load("models/water/waterDUDV.png", &width, &height, &nrComponents, 0);
+        glBindTexture(GL_TEXTURE_2D, dudvMapTextureId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        stbi_image_free(data);
+
+
 
 
 	shader.useShaderProgram();
     glUniform1i(glGetUniformLocation(shader.shaderProgram, "reflectionTexture"), 0);
     glUniform1i(glGetUniformLocation(shader.shaderProgram, "refractionTexture"), 1);
-
+    glUniform1i(dudvMap, 2);
 }
 
-void Water::renderWater(gps::Shader shader, glm::mat4 projection, gps::Camera camera)
+void Water::renderWater(gps::Shader& shader, glm::mat4 projection, gps::Camera camera, float deltaTime)
 {
 	shader.useShaderProgram();
 
-	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+    moveFactor += WAVE_SPEED * deltaTime;
+    if (moveFactor > 1.0f) moveFactor-=1.0f;
+    glUniform1f(moveFactorLoc, moveFactor);
+
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, dudvMapTextureId);
+
+
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+    glUniform3fv(cameraposLoc, 1, glm::value_ptr(camera.getPositionCamera()));
 	// world transformation and send uniforms
 	glm::mat4 model = glm::mat4(1.0f);
-	glUniformMatrix4fv(glGetUniformLocation(shader.shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 
 	//render

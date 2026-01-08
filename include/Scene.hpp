@@ -55,6 +55,8 @@ namespace gps {
 		void positionTrees();
 		int maxh = 4449; //from terrain.cpp, height multiplier
 		bool dayTime = true;
+		float getTerrainHeight(float worldX, float worldZ);
+		float getHeightAt(int i, int j);
 	private:
 		
 		//models for entities
@@ -90,6 +92,7 @@ namespace gps {
 		float scale = 0.5f;
 		float bigX = 10241.0f;
 		float bigY = 7712.0f;
+
 
 	};
 

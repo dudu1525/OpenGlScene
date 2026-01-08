@@ -568,3 +568,39 @@ void gps::Scene::renderLights(Shader lightsshader)
 
 
 }
+//made with help of video: https://www.youtube.com/watch?v=j_bTClbcCao&list=PLA0dXqQjCx0S9qG5dWLsheiCJV-_eLUM0&index=11
+float gps::Scene::getTerrainHeight(float worldX, float worldZ) {
+	//one 'unit' of the scene, given by the rez
+	float unitX = WIDTH / (REZ - 1.0f);
+	float unitZ = HEIGHT / (REZ - 1.0f);
+	//add back the width and height / 2, as in terrain
+	float localX = worldX + (WIDTH / 2.0f);
+	float localZ = worldZ + (HEIGHT / 2.0f);
+	//get the bottom left value
+	int i = std::floor(localX / unitX);
+	int j = std::floor(localZ / unitZ);
+
+	//if outside the world
+	if (i < 0 || i >= REZ - 1 || j < 0 || j >= REZ - 1) return 0.0f;
+
+	float fracX = (localX - (i * unitX)) / unitX;//percentage on x axis from left bottom
+	float fracZ = (localZ - (j * unitZ)) / unitZ;//percentage on z axis from left bottom
+	//4 points used in interpolation
+	float hBL = getHeightAt(i, j);        
+	float hBR = getHeightAt(i + 1, j);     
+	float hTL = getHeightAt(i, j + 1);     
+	float hTR = getHeightAt(i + 1, j + 1); 
+
+
+	float interpolateBottom = hBL + (hBR - hBL) * fracX;
+	float interpolateTop = hTL + (hTR - hTL) * fracX;
+
+	return interpolateBottom + (interpolateTop - interpolateBottom) * fracZ;
+}
+
+float gps::Scene::getHeightAt(int i, int j) {
+	//calculate height as in position trees
+	float x = -WIDTH / 2.0f + (float)i * WIDTH / (REZ - 1);
+	float z = -HEIGHT / 2.0f + (float)j * HEIGHT / (REZ - 1);
+	return perlinNoise(x, z);
+}

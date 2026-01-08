@@ -45,7 +45,7 @@ float fireTime = 0.0f;//used to change the color of the point light around the f
 /// ////////////////////////////binds
 GLboolean pressedKeys[1024];
 bool cursorEnabled = true;
-
+bool enableCollisions = false;
 /////////////////////////// shaders
 gps::Shader myBasicShader;
 gps::Shader skyboxShader;
@@ -145,6 +145,13 @@ void keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int
             glfwSetWindowMonitor(window, _fullscreen ? glfwGetPrimaryMonitor() : NULL, 0, 0, 1024, 768, GLFW_DONT_CARE);
             _fullscreen = !_fullscreen;
 
+
+    }
+    if (key == GLFW_KEY_J && action == GLFW_PRESS)
+    {
+
+
+        enableCollisions = !enableCollisions;
 
     }
     if (key == GLFW_KEY_C and action == GLFW_PRESS)
@@ -324,7 +331,13 @@ void renderScene(float deltaTime, WaterFrameBuffers& buffers) {
 
     }
     myBasicShader.useShaderProgram();
+    if (enableCollisions)
+    {
+        float ypos = scene.getTerrainHeight(camera.getPositionCamera().x, camera.getPositionCamera().z);
+       glm::vec3 newPos =glm::vec3(camera.getPositionCamera().x, ypos+700, camera.getPositionCamera().z);
+        camera.setPosition(newPos);
 
+    }
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view)); //set the values for the uniform containing the view
     projection = glm::perspective(glm::radians(camera.zoom), (float)myWindow.getWindowDimensions().width / (float)myWindow.getWindowDimensions().height, 10.0f, 100000.0f);
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection)); //set the projection for the uniform containing the view

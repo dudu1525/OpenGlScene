@@ -57,3 +57,7 @@ Thumbs.db
 #models/
 !dependencies/lib/
 !dependencies/lib/*.lib
+
+!models/
+!models/**/
+!models/**/*.obj
